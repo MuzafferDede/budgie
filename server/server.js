@@ -4,16 +4,25 @@ const io = require('socket.io')(3001, {
     origin: '*',
   }
 })
+const users = {};
 
 io.on('connection', (socket) => {
-  console.log(socket.id);
-  socket.on('hello', message => {
-    socket.emit('hello-back',message)
+  socket.on('message', message => {
+    console.log(message)
+  })
+
+  socket.on('send-message', sender => {
+    io.emit('received-message', sender)
+  })
+
+  //login
+  socket.on('login',user => {
+    users[socket.id] = user;
   })
 
   // disconnecting
   socket.on('disconnecting',() => {
-    console.log('disconnected')
+    delete users[socket.id];
   })
 })
 
