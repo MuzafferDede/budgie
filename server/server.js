@@ -1,12 +1,12 @@
 
-const server = require('socket.io')(3001, {
+const io = require('socket.io')(3001, {
   cors: {
     origin: '*',
   }
 })
 
-server.on('connection', (socket) => {
-
+io.on('connection', (socket) => {
+  console.log(socket.id);
   socket.on('hello', message => {
     socket.emit('hello-back',message)
   })
