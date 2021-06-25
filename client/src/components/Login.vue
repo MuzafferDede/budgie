@@ -6,13 +6,13 @@
           <label for="name" class="text-sm text-white">Your name</label>
           <input
             type="text"
-            v-model="user.name"
+            v-model="user"
             class="p-4 rounded w-full"
             placeholder="e.g John"
             @keyup.enter.prevent="login"
             @input="error = ''"
           />
-          <p v-if="!user.name && error" class="text-red-600 text-sm">
+          <p v-if="!user && error" class="text-red-600 text-sm">
             {{ error }}
           </p>
         </div>
@@ -41,13 +41,13 @@
 export default {
   data() {
     return {
-      user: {},
+      user: undefined,
       error: "",
     };
   },
   methods: {
     login() {
-      this.user.name
+      this.user
         ? this.$emit("login", this.user)
         : (this.error = "Please enter your name");
     },

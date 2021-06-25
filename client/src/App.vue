@@ -1,29 +1,35 @@
 <template>
-  <Login v-if="!loginUser" @login="join($event)" />
-  <Chat v-else :user="loginUser" :socket="serverSocket" />
+  <Login v-if="!user" @login="join($event)" />
+  <Chat v-else :current-user="user" :socket="socket" />
 </template>
 
-<script setup>
+<script>
 import { io } from "socket.io-client";
-
 import "./assets/style.css";
-
-import { ref, reactive } from "vue";
 
 import Login from "./components/Login.vue";
 import Chat from "./components/Chat.vue";
 
-const loginUser = ref(undefined);
-let serverSocket = ref(undefined);
-
-const join = (user) => {
-  const socket = io("http://localhost:3001");
-
-  socket.on("connect", () => {
-    socket.emit("login", user);
-    serverSocket.value = socket;
-    loginUser.value = user;
-  });
+export default {
+  components: {
+    Login,
+    Chat,
+  },
+  data() {
+    return {
+      user: undefined,
+      socket: undefined,
+    };
+  },
+  methods: {
+    join(user) {
+      this.user = user;
+      this.socket = io("http://localhost:3001");
+      this.socket.on("connect", () => {
+        this.socket.emit("login", this.user);
+      });
+    },
+  },
 };
 </script>
 
