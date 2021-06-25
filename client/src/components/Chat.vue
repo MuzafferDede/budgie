@@ -38,7 +38,7 @@
           <div
             v-for="(message, index) in messages"
             :key="index"
-            class="grid gap-1"
+            class="grid gap-1 group"
             :class="{
               'justify-end text-right': message.socketId === socket.id,
               'justify-start': message.socketId !== socket.id,
@@ -46,8 +46,8 @@
           >
             <span
               class="text-sm text-gray-500 italic mt-4"
-              v-if="message.socketId !== socket.id"
-              >{{ message.sender }}</span
+              
+              ><span v-if="message.socketId !== socket.id">{{ message.sender }}</span> <span class="text-xs opacity-0 group-hover:opacity-100 not-italic text-blue-400"> {{ (new Date).toLocaleDateString() }}</span></span
             >
             <p
               class="py-2 px-4 inline-block rounded-lg text-sm mt-1"

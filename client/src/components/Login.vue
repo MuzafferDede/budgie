@@ -2,6 +2,10 @@
   <div class="flex items-center justify-center bg-blue-400 h-screen">
     <div class="container">
       <div class="grid gap-4 mx-auto lg:w-1/3">
+        <div class="text-white text-center">
+          <h1 class="text-9xl flex items-center gap-4 justify-center"><span class="text-pink-500">h</span><span class="text-3xl">&</span><span class="text-indigo-600">m</span></h1>
+          <p>Messenger</p>
+        </div>
         <div class="w-full space-y-1">
           <label for="name" class="text-sm text-white">Your name</label>
           <input
