@@ -1,6 +1,6 @@
 <template>
   <Login v-if="!user" @login="join($event)" />
-  <Chat v-else :current-user="user" :socket="socket" />
+  <Chat v-else :user="{ info: user, socket }" />
 </template>
 
 <script>

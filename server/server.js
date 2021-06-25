@@ -8,32 +8,33 @@ const users = {};
 const rooms = {};
 
 io.on('connection', (socket) => {
-  
+  let userId;
   socket.on('send message', sender => {
     io.emit('received message', sender)
   })
 
   //login
   socket.on('login', user => {
-    users[socket.id] = { id: socket.id, name: user };
+    userId = user.id;
+    users[userId] =  user;
     io.emit('new user', users)
   })
 
-  socket.on('join room', (room,cb) => {
+  socket.on('join room', (room, cb) => {
     socket.join(room, cb)
   })
 
-  socket.on('typing', user => {
-    io.emit('user typing', socket.id)
+  socket.on('typing', () => {
+    io.emit('user typing', userId)
   })
 
-  socket.on('not typing', user => {
-    io.emit('user not typing', socket.id)
+  socket.on('not typing', () => {
+    io.emit('user not typing', userId)
   })
 
   // disconnecting
   socket.on('disconnecting', () => {
-    delete users[socket.id];
+    delete users[userId];
     io.emit('new user', users)
   })
 })

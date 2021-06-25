@@ -18,14 +18,14 @@
             gap-1
             items-center
           "
-          v-for="user in filteredUsers"
-          :key="user.name"
+          v-for="userItem in filteredUsers"
+          :key="userItem.id"
         >
           <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-          <span>{{ user.name }}</span>
+          <span>{{ userItem.name }}</span>
           <span
             class="italic ml-auto text-sm text-gray-400 animate-pulse"
-            v-if="typingUsers.includes(user.id)"
+            v-if="checkTypers(userItem)"
             >typing...</span
           >
         </div>
@@ -70,20 +70,20 @@
             :key="index"
             class="grid gap-1 group"
             :class="{
-              'justify-end text-right': message.socketId === socket.id,
-              'justify-start': message.socketId !== socket.id,
+              'justify-end text-right': message.socketId === user.socket.id,
+              'justify-start': message.socketId !== user.socket.id,
             }"
           >
             <span
               class="text-sm text-gray-500 italic mt-4"
               
-              ><span v-if="message.socketId !== socket.id">{{ message.sender }}</span> <span class="text-xs opacity-0 group-hover:opacity-100 not-italic text-blue-400"> {{ (new Date).toLocaleDateString() }}</span></span
+              ><span v-if="message.socketId !== user.socket.id">{{ message.sender.name }}</span> <span class="text-xs opacity-0 group-hover:opacity-100 not-italic text-blue-400"> {{ (new Date).toLocaleDateString() }}</span></span
             >
             <p
               class="py-2 px-4 inline-block rounded-lg text-sm mt-1"
               :class="{
-                'bg-blue-500 text-white': message.socketId === socket.id,
-                'bg-gray-200 text-gray-900': message.socketId !== socket.id,
+                'bg-blue-500 text-white': message.socketId === user.socket.id,
+                'bg-gray-200 text-gray-900': message.socketId !== user.socket.id,
               }"
             >
               {{ message.body }}
@@ -113,13 +113,9 @@
 <script>
 export default {
   props: {
-    currentUser: {
-      type: String,
-      default: undefined,
-    },
-    socket: {
+    user: {
       type: Object,
-      default: () => undefined,
+      default: undefined,
     },
   },
   data() {
@@ -135,35 +131,38 @@ export default {
   computed: {
     filteredUsers() {
       return Object.values(this.users).filter(
-        (user) => user.id !== this.socket.id
+        (user) => user.id !== this.user.info.id
       );
     },
+    checkTypers() {
+      return (user) => {
+        return this.typingUsers.includes(user.id)
+      }
+    }
   },
   mounted() {
-    this.socket.on("received message", (sender) => {
+    this.user.socket.on("received message", (sender) => {
       this.messages.push(sender);
     });
 
-    this.socket.on("new user", (users) => {
+    this.user.socket.on("new user", (users) => {
       this.users = users;
     });
 
-    let timer;
-
-    this.socket.on("user typing", (user) => {
-      this.typingUsers.push(user);
+    this.user.socket.on("user typing", (socketId) => {
+      this.typingUsers.push(socketId);
     });
 
-    this.socket.on("user not typing", (user) => {
-      this.typingUsers = this.typingUsers.filter((item) => item !== user);
+    this.user.socket.on("user not typing", (socketId) => {
+      this.typingUsers = this.typingUsers.filter((item) => item !== socketId);
     });
   },
   methods: {
     sendMessage() {
       if (this.message) {
-        this.socket.emit("send message", {
-          sender: this.currentUser,
-          socketId: this.socket.id,
+        this.user.socket.emit("send message", {
+          sender: this.user.info,
+          socketId: this.user.socket.id,
           body: this.message,
         });
         this.message = undefined;
@@ -172,9 +171,8 @@ export default {
   },
   watch: {
     message(value) {
-      this.socket.emit(
-        Boolean(value) ? "typing" : "not typing",
-        this.currentUser
+      this.user.socket.emit(
+        Boolean(value) ? "typing" : "not typing"
       );
     },
   },
