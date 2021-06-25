@@ -5,31 +5,36 @@ const io = require('socket.io')(3001, {
   }
 })
 const users = {};
+const rooms = {};
 
 io.on('connection', (socket) => {
   
-  socket.on('send-message', sender => {
-    io.emit('received-message', sender)
+  socket.on('send message', sender => {
+    io.emit('received message', sender)
   })
 
   //login
   socket.on('login', user => {
     users[socket.id] = { id: socket.id, name: user };
-    io.emit('users-updated', users)
+    io.emit('new user', users)
+  })
+
+  socket.on('join room', (room,cb) => {
+    socket.join(room, cb)
   })
 
   socket.on('typing', user => {
-    io.emit('user-typing', socket.id)
+    io.emit('user typing', socket.id)
   })
 
-  socket.on('not-typing', user => {
-    io.emit('user-not-typing', socket.id)
+  socket.on('not typing', user => {
+    io.emit('user not typing', socket.id)
   })
 
   // disconnecting
   socket.on('disconnecting', () => {
     delete users[socket.id];
-    io.emit('users-updated', users)
+    io.emit('new user', users)
   })
 })
 

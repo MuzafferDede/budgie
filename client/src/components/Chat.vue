@@ -29,8 +29,38 @@
             >typing...</span
           >
         </div>
-        <div class="text-sm text-gray-400" v-if="filteredUsers.length === 0">
-          There are currently no online users available.
+        <div class="text-sm text-gray-400 space-y-2">
+          <p v-if="filteredUsers.length === 0">
+            There are currently no online users available.
+          </p>
+          <button class="bg-green-400 hover:bg-green-500 text-white rounded p-2 text-xs">Start a new converstaion</button>
+        </div>
+        <div class="h-1 bg-gray-100 w-full my-4"></div>
+         <h2 class="font-bold">Rooms</h2>
+        <div
+          class="
+            bg-gray-100
+            rounded
+            p-3
+            w-full
+            text-gray-700
+            font-semibold
+            flex
+            justify-start
+            gap-1
+            items-center
+          "
+          v-for="room in rooms"
+          :key="room.name"
+        >
+          <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
+          <span>{{ room.name }}</span>
+        </div>
+        <div class="text-sm text-gray-400 space-y-2" v-if="Object.keys(rooms).length === 0">
+          <p>
+            There are currently no rooms available.
+          </p>
+          <button class="bg-green-400 hover:bg-green-500 text-white rounded p-2 text-xs">Add Room</button>
         </div>
       </div>
       <div class="col-span-2 flex flex-col justify-between gap-4">
@@ -69,7 +99,7 @@
             @keyup.enter.prevent="sendMessage"
           />
           <button
-            class="bg-green-400 text-white p-4 rounded"
+            class="bg-green-400 hover:bg-green-500 text-white p-4 rounded"
             @click="sendMessage"
           >
             Send
@@ -95,7 +125,8 @@ export default {
   data() {
     return {
       messages: [],
-      users: [],
+      users: {},
+      rooms: {},
       message: undefined,
       typingUsers: [],
       timer: undefined,
@@ -109,28 +140,28 @@ export default {
     },
   },
   mounted() {
-    this.socket.on("received-message", (sender) => {
+    this.socket.on("received message", (sender) => {
       this.messages.push(sender);
     });
 
-    this.socket.on("users-updated", (users) => {
+    this.socket.on("new user", (users) => {
       this.users = users;
     });
 
     let timer;
 
-    this.socket.on("user-typing", (user) => {
+    this.socket.on("user typing", (user) => {
       this.typingUsers.push(user);
     });
 
-    this.socket.on("user-not-typing", (user) => {
+    this.socket.on("user not typing", (user) => {
       this.typingUsers = this.typingUsers.filter((item) => item !== user);
     });
   },
   methods: {
     sendMessage() {
       if (this.message) {
-        this.socket.emit("send-message", {
+        this.socket.emit("send message", {
           sender: this.currentUser,
           socketId: this.socket.id,
           body: this.message,
@@ -142,7 +173,7 @@ export default {
   watch: {
     message(value) {
       this.socket.emit(
-        Boolean(value) ? "typing" : "not-typing",
+        Boolean(value) ? "typing" : "not typing",
         this.currentUser
       );
     },

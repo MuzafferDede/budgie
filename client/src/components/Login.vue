@@ -12,7 +12,7 @@
             type="text"
             v-model="user"
             class="p-4 rounded w-full"
-            placeholder="e.g John"
+            placeholder="e.g Muzaffer"
             @keyup.enter.prevent="login"
             @input="error = ''"
           />
