@@ -33,10 +33,10 @@
           <p v-if="filteredUsers.length === 0">
             There are currently no online users available.
           </p>
-          <button class="bg-green-400 hover:bg-green-500 text-white rounded p-2 text-xs">Start a new converstaion</button>
+          <ui-button>Start a new converstaio</ui-button>
         </div>
         <div class="h-1 bg-gray-100 w-full my-4"></div>
-         <h2 class="font-bold">Rooms</h2>
+        <h2 class="font-bold">Rooms</h2>
         <div
           class="
             bg-gray-100
@@ -56,11 +56,15 @@
           <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
           <span>{{ room.name }}</span>
         </div>
-        <div class="text-sm text-gray-400 space-y-2" v-if="Object.keys(rooms).length === 0">
-          <p>
-            There are currently no rooms available.
-          </p>
-          <button class="bg-green-400 hover:bg-green-500 text-white rounded p-2 text-xs">Add Room</button>
+        <div
+          class="text-sm text-gray-400 space-y-2"
+          v-if="Object.keys(rooms).length === 0"
+        >
+          <p>There are currently no rooms available.</p>
+          <ui-button>Add a room</ui-button>
+        </div>
+        <div class="w-full mt-auto">
+          <ui-button color="blue" @click="logout">Logout</ui-button>
         </div>
       </div>
       <div class="col-span-2 flex flex-col justify-between gap-4">
@@ -68,22 +72,34 @@
           <div
             v-for="(message, index) in messages"
             :key="index"
-            class="grid gap-1 group"
+            class="flex flex-col gap-1 group"
             :class="{
-              'justify-end text-right': message.socketId === user.socket.id,
-              'justify-start': message.socketId !== user.socket.id,
+              'items-end text-right': message.socketId === user.socket.id,
+              'items-start': message.socketId !== user.socket.id,
             }"
           >
-            <span
-              class="text-sm text-gray-500 italic mt-4"
-              
-              ><span v-if="message.socketId !== user.socket.id">{{ message.sender.name }}</span> <span class="text-xs opacity-0 group-hover:opacity-100 not-italic text-blue-400"> {{ (new Date).toLocaleDateString() }}</span></span
+            <span class="text-sm text-gray-500 italic mt-4 space-x-2"
+              ><span v-if="message.socketId !== user.socket.id">{{
+                message.sender.name
+              }}</span>
+              <span
+                class="
+                  text-xs
+                  opacity-0
+                  group-hover:opacity-100
+                  not-italic
+                  text-blue-400
+                "
+              >
+                {{ time(message.time) }}</span
+              ></span
             >
             <p
               class="py-2 px-4 inline-block rounded-lg text-sm mt-1"
               :class="{
                 'bg-blue-500 text-white': message.socketId === user.socket.id,
-                'bg-gray-200 text-gray-900': message.socketId !== user.socket.id,
+                'bg-gray-200 text-gray-900':
+                  message.socketId !== user.socket.id,
               }"
             >
               {{ message.body }}
@@ -93,17 +109,18 @@
         <div class="flex gap-4">
           <input
             type="text"
+            ref="message"
             class="w-full p-4 rounded"
             placeholder="Your message"
             v-model="message"
             @keyup.enter.prevent="sendMessage"
           />
-          <button
-            class="bg-green-400 hover:bg-green-500 text-white p-4 rounded"
+          <ui-button
             @click="sendMessage"
+            :disabled="!message"
+            :class="{ 'opacity-75 pointer-events-none': !message }"
+            >Send</ui-button
           >
-            Send
-          </button>
         </div>
       </div>
     </div>
@@ -111,7 +128,11 @@
 </template>
 
 <script>
+import UiButton from "./ui/UiButton.vue";
+import moment from "moment";
+
 export default {
+  components: { UiButton },
   props: {
     user: {
       type: Object,
@@ -125,7 +146,6 @@ export default {
       rooms: {},
       message: undefined,
       typingUsers: [],
-      timer: undefined,
     };
   },
   computed: {
@@ -136,13 +156,19 @@ export default {
     },
     checkTypers() {
       return (user) => {
-        return this.typingUsers.includes(user.id)
-      }
-    }
+        return this.typingUsers.includes(user.id);
+      };
+    },
+    typing() {
+      return Boolean(this.message);
+    },
+    time() {
+      return (date) => moment(date).format('LT');
+    },
   },
   mounted() {
-    this.user.socket.on("received message", (sender) => {
-      this.messages.push(sender);
+    this.user.socket.on("received message", (message) => {
+      this.messages.push(message);
     });
 
     this.user.socket.on("new user", (users) => {
@@ -166,14 +192,17 @@ export default {
           body: this.message,
         });
         this.message = undefined;
+        this.$refs.message.focus();
       }
+    },
+    logout() {
+      localStorage.removeItem("chat-user");
+      this.$emit("logout");
     },
   },
   watch: {
-    message(value) {
-      this.user.socket.emit(
-        Boolean(value) ? "typing" : "not typing"
-      );
+    typing(value) {
+      this.user.socket.emit(Boolean(value) ? "typing" : "not typing");
     },
   },
 };

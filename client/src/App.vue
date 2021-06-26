@@ -1,6 +1,6 @@
 <template>
   <Login v-if="!user" @login="join($event)" />
-  <Chat v-else :user="{ info: user, socket }" />
+  <Chat v-else :user="{ info: user, socket }" @logout="logout" />
 </template>
 
 <script>
@@ -29,6 +29,10 @@ export default {
         this.socket.emit("login", this.user);
       });
     },
+    logout() {
+      this.socket.disconnect()
+      this.user = undefined;
+    }
   },
 };
 </script>

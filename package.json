@@ -5,5 +5,8 @@
     "dev": "yarn --cwd ./client run dev & yarn --cwd ./server run dev"
   },
   "author": "Muzaffer Dede <dedemuzaffer@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "moment": "^2.29.1"
+  }
 }

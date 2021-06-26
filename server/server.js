@@ -10,7 +10,7 @@ const rooms = {};
 io.on('connection', (socket) => {
   let userId;
   socket.on('send message', sender => {
-    io.emit('received message', sender)
+    io.emit('received message', {...sender, time: new Date() })
   })
 
   //login
