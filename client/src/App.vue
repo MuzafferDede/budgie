@@ -1,6 +1,8 @@
 <template>
-  <Login v-if="!user" @login="join($event)" />
-  <Chat v-else :user="user" :socket="socket" @logout="logout" />
+  <div class="bg-indigo-400 min-h-screen lg:h-screen flex">
+    <Login v-if="!user" @login="join($event)" />
+    <Messenger v-else :user="user" :socket="socket" @logout="logout" />
+  </div>
 </template>
 
 <script>
@@ -8,12 +10,12 @@ import { io } from "socket.io-client";
 import "./assets/style.css";
 
 import Login from "./components/Login.vue";
-import Chat from "./components/Chat.vue";
+import Messenger from "./components/Messenger.vue";
 
 export default {
   components: {
     Login,
-    Chat,
+    Messenger,
   },
   data() {
     return {
