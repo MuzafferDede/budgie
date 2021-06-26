@@ -4,39 +4,67 @@ const io = require('socket.io')(3001, {
     origin: '*',
   }
 })
-const users = {};
-const rooms = {};
+
+let numUsers = 0;
 
 io.on('connection', (socket) => {
-  let userId;
-  socket.on('send message', sender => {
-    io.emit('received message', {...sender, time: new Date() })
-  })
+  let addedUser = false;
 
-  //login
-  socket.on('login', user => {
-    userId = user.id;
-    users[userId] =  user;
-    io.emit('new user', users)
-  })
+  // when the client emits 'new message', this listens and executes
+  socket.on('new message', (data) => {
+    // we tell the client to execute 'new message'
+    socket.broadcast.emit('new message', {
+      user: socket.user,
+      body: data,
+      time: new Date()
+    });
+  });
 
-  socket.on('join room', (room, cb) => {
-    socket.join(room, cb)
-  })
+  // when the client emits 'add user', this listens and executes
+  socket.on('add user', (user) => {
+    if (addedUser) return;
 
+    // we store the user in the socket session for this client
+    socket.user = user;
+    ++numUsers;
+    addedUser = true;
+    socket.emit('login', {
+      numUsers: numUsers
+    });
+    // echo globally (all clients) that a person has connected
+    socket.broadcast.emit('user joined', {
+      user: socket.user,
+      numUsers: numUsers
+    });
+
+  });
+
+  // when the client emits 'typing', we broadcast it to others
   socket.on('typing', () => {
-    io.emit('user typing', userId)
-  })
+    socket.broadcast.emit('typing', {
+      user: socket.user
+    });
+  });
 
-  socket.on('not typing', () => {
-    io.emit('user not typing', userId)
-  })
+  // when the client emits 'stop typing', we broadcast it to others
+  socket.on('stop typing', () => {
+    socket.broadcast.emit('stop typing', {
+      user: socket.user
+    });
+  });
 
-  // disconnecting
-  socket.on('disconnecting', () => {
-    delete users[userId];
-    io.emit('new user', users)
-  })
-})
+  // when the user disconnects.. perform this
+  socket.on('disconnect', () => {
+    if (addedUser) {
+      --numUsers;
+
+      // echo globally that this client has left
+      socket.broadcast.emit('user left', {
+        user: socket.user,
+        numUsers: numUsers
+      });
+    }
+  });
+});
 
 

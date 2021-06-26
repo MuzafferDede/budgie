@@ -18,14 +18,14 @@
             gap-1
             items-center
           "
-          v-for="userItem in filteredUsers"
-          :key="userItem.id"
+          v-for="item in filteredUsers"
+          :key="item.user.id"
         >
           <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-          <span>{{ userItem.name }}</span>
+          <span>{{ item.user.name }}</span>
           <span
             class="italic ml-auto text-sm text-gray-400 animate-pulse"
-            v-if="checkTypers(userItem)"
+            v-if="checkTypers(item.user.id)"
             >typing...</span
           >
         </div>
@@ -74,13 +74,13 @@
             :key="index"
             class="flex flex-col gap-1 group"
             :class="{
-              'items-end text-right': message.socketId === user.socket.id,
-              'items-start': message.socketId !== user.socket.id,
+              'items-end text-right': message.user.id === user.id,
+              'items-start': message.user.id !== user.id,
             }"
           >
             <span class="text-sm text-gray-500 italic mt-4 space-x-2"
-              ><span v-if="message.socketId !== user.socket.id">{{
-                message.sender.name
+              ><span v-if="message.user.id !== user.id">{{
+                message.user.name
               }}</span>
               <span
                 class="
@@ -97,9 +97,8 @@
             <p
               class="py-2 px-4 inline-block rounded-lg text-sm mt-1"
               :class="{
-                'bg-blue-500 text-white': message.socketId === user.socket.id,
-                'bg-gray-200 text-gray-900':
-                  message.socketId !== user.socket.id,
+                'bg-blue-500 text-white': message.user.id === user.id,
+                'bg-gray-200 text-gray-900': message.user.id !== user.id,
               }"
             >
               {{ message.body }}
@@ -130,6 +129,7 @@
 <script>
 import UiButton from "./ui/UiButton.vue";
 import moment from "moment";
+
 const sounds = {
   online: new Audio("online.mp3"),
   typing: new Audio("typing.mp3"),
@@ -139,6 +139,10 @@ export default {
   components: { UiButton },
   props: {
     user: {
+      type: Object,
+      default: undefined,
+    },
+    socket: {
       type: Object,
       default: undefined,
     },
@@ -155,12 +159,12 @@ export default {
   computed: {
     filteredUsers() {
       return Object.values(this.users).filter(
-        (user) => user.id !== this.user.info.id
+        (data) => data.user.id !== this.user.id
       );
     },
     checkTypers() {
-      return (user) => {
-        return this.typingUsers.includes(user.id);
+      return (id) => {
+        return this.typingUsers.includes(id);
       };
     },
     typing() {
@@ -171,39 +175,68 @@ export default {
     },
   },
   mounted() {
-    this.user.socket.on("received message", (message) => {
+    this.socket.on("new message", (data) => {
+      this.play("typing");
+
+      this.messages.push(data);
+    });
+
+    this.socket.on("user joined", (data) => {
       this.play("online");
-      this.messages.push(message);
+      this.users[data.user.id] = data;
     });
 
-    this.user.socket.on("new user", (users) => {
+    this.socket.on("user left", (data) => {
       this.play("typing");
-      this.users = users;
+
+      delete this.users[data.user.id];
     });
 
-    this.user.socket.on("user typing", (socketId) => {
+    this.socket.on("typing", (data) => {
       this.play("typing");
-      this.typingUsers.push(socketId);
+
+      this.typingUsers.push(data.user.id);
     });
 
-    this.user.socket.on("user not typing", (socketId) => {
-      this.typingUsers = this.typingUsers.filter((item) => item !== socketId);
+    this.socket.on("stop typing", (data) => {
+      this.typingUsers = this.typingUsers.filter((id) => id !== data.user.id);
+    });
+
+    this.socket.on("disconnect", () => {
+      console.log("you have been disconnected");
+    });
+
+    this.socket.on("reconnect", () => {
+      console.log("you have been reconnected");
+
+      if (user) {
+        socket.emit("add user", user);
+      }
+    });
+
+    this.socket.on("reconnect_error", () => {
+      console.log("attempt to reconnect has failed");
     });
   },
   methods: {
     sendMessage() {
       if (this.message) {
-        this.user.socket.emit("send message", {
-          sender: this.user.info,
-          socketId: this.user.socket.id,
+        this.socket.emit("new message", this.message);
+
+        this.messages.push({
+          user: this.user,
           body: this.message,
+          time: new Date(),
         });
+
         this.message = undefined;
+
         this.$refs.message.focus();
       }
     },
     logout() {
       localStorage.removeItem("chat-user");
+
       this.$emit("logout");
     },
     play(type = "online") {
@@ -212,7 +245,7 @@ export default {
   },
   watch: {
     typing(value) {
-      this.user.socket.emit(Boolean(value) ? "typing" : "not typing");
+      this.socket.emit(Boolean(value) ? "typing" : "stop typing");
     },
   },
 };
