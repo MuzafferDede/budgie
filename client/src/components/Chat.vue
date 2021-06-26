@@ -130,6 +130,10 @@
 <script>
 import UiButton from "./ui/UiButton.vue";
 import moment from "moment";
+const sounds = {
+  online: new Audio("online.mp3"),
+  typing: new Audio("typing.mp3"),
+};
 
 export default {
   components: { UiButton },
@@ -163,19 +167,22 @@ export default {
       return Boolean(this.message);
     },
     time() {
-      return (date) => moment(date).format('LT');
+      return (date) => moment(date).format("LT");
     },
   },
   mounted() {
     this.user.socket.on("received message", (message) => {
+      this.play("online");
       this.messages.push(message);
     });
 
     this.user.socket.on("new user", (users) => {
+      this.play("typing");
       this.users = users;
     });
 
     this.user.socket.on("user typing", (socketId) => {
+      this.play("typing");
       this.typingUsers.push(socketId);
     });
 
@@ -198,6 +205,9 @@ export default {
     logout() {
       localStorage.removeItem("chat-user");
       this.$emit("logout");
+    },
+    play(type = "online") {
+      sounds[type].play();
     },
   },
   watch: {

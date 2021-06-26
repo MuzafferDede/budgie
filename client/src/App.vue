@@ -24,7 +24,9 @@ export default {
   methods: {
     join(user) {
       this.user = user;
-      this.socket = io("http://localhost:3001");
+      this.socket = io("http://localhost:3001", {
+        socketId: 'test'
+      });
       this.socket.on("connect", () => {
         this.socket.emit("login", this.user);
       });
