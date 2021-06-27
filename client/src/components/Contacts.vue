@@ -1,6 +1,62 @@
 <template>
   <div class="space-y-4 p-4 w-full flex flex-col overflow-hidden">
     <h2 class="font-bold">Contacts</h2>
+    <div class="w-full space-y-4">
+      <ui-button @click="showAddContact = true">Add</ui-button>
+      <div
+        v-if="showAddContact"
+        class="
+          bg-black bg-opacity-80
+          fixed
+          z-30
+          inset-0
+          flex
+          items-center
+          justify-center
+        "
+      >
+        <div class="bg-white rounded shadow p-4 lg:w-96">
+          <div class="flex flex-col gap-4">
+            <label for="contact"> Contact ID </label>
+            <input
+              class="p-4 ring-2 rounded"
+              placeholder="xxxxxxxx-xxxxxx-xxxxxxxxx"
+              type="text"
+              name="contact"
+              id="contact"
+              v-model="contact"
+            />
+            <ui-button
+              @click="addContact"
+              :class="{
+                'animate-ping': sent,
+                'opacity-75 pointer-events-none': !contact,
+              }"
+              >{{ sent ? "Sent" : "Request" }}</ui-button
+            >
+          </div>
+        </div>
+      </div>
+      <div
+        class="
+          bg-gray-400
+          text-white text-xs
+          p-3
+          rounded
+          flex
+          justify-between
+          items-center
+        "
+        v-for="request in filteredRequests"
+        :key="request.id"
+      >
+        <span>{{ request.name }}</span>
+        <div class="ml-auto flex space-x-2 items-center">
+          <ui-button @click="accept(request)">Accept</ui-button>
+          <ui-button color="red" @click="reject(request)">Reject</ui-button>
+        </div>
+      </div>
+    </div>
     <div class="w-full space-y-4 overflow-auto">
       <div
         class="
@@ -15,14 +71,14 @@
           gap-1
           items-center
         "
-        v-for="conversation in conversations"
-        :key="conversation.user.id"
+        v-for="contact in contacts"
+        :key="contact.id"
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-        <span>{{ conversation.user.name }}</span>
+        <span>{{ contact.name }}</span>
         <span
           class="italic ml-auto text-sm text-gray-400 animate-pulse"
-          v-if="isTyping(conversation.user.id)"
+          v-if="isTyping(contact.id)"
           >typing...</span
         >
       </div>
@@ -31,22 +87,67 @@
 </template>
 
 <script>
+import UiButton from "./ui/UiButton.vue";
 export default {
+  components: { UiButton },
+  data() {
+    return {
+      showAddContact: false,
+      sent: false,
+      contact: "",
+      requests: {},
+      contacts: {},
+    };
+  },
   props: {
-    conversations: {
-      type: Array,
-      default: () => [],
-    },
     typers: {
       type: Array,
       default: () => [],
     },
+    socket: {
+      type: Object,
+      default: undefined,
+    },
   },
   computed: {
+    filteredRequests() {
+      return Object.values(this.requests);
+    },
     isTyping() {
       return (id) => {
         return this.typers.includes(id);
       };
+    },
+  },
+  mounted() {
+    this.socket.on("contact request", (contact) => {
+      this.requests[contact.id] = contact;
+    });
+
+    this.socket.on('request accepted',(contact) => {
+      this.contacts[contact.id] = contact;
+    })
+  },
+  methods: {
+    addContact() {
+      if (!this.contact) return;
+
+      this.socket.emit("add contact", this.contact);
+      this.sent = true;
+      this.contact = undefined;
+
+      setTimeout(() => {
+        this.showAddContact = false;
+        this.sent = false;
+      }, 500);
+    },
+    accept(request) {
+      this.socket.emit("accept request", request);
+      this.contacts[request.id] = request;
+      delete this.requests[request.id];
+    },
+    reject(request) {
+      delete this.requests[request.id];
     },
   },
 };

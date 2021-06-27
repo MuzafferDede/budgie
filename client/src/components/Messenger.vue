@@ -9,32 +9,39 @@
         gap-2
         flex flex-col
         items-start
-        h-[47vh] lg:h-auto
+        h-[47vh]
+        lg:h-auto
       "
     >
-      <Contacts :conversations="filteredUsers" :typers="typingUsers" />
-      <div class="w-full mt-auto bg-gray-100 py-2 px-4">
+      <Contacts :typers="typingUsers" :socket="socket"/>
+      <div
+        class="
+          w-full
+          mt-auto
+          bg-gray-100
+          py-2
+          px-4
+          flex
+          space-x-2
+          justify-between
+          items-center
+        "
+      >
         <ui-button color="blue" @click="logout">Logout</ui-button>
+        <div class="space-y-1 text-xs">
+          <strong>Your id</strong>
+          <p class="text-gray-500">
+            {{ user.id }}
+          </p>
+        </div>
       </div>
     </div>
     <div class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto">
-      <conversation :messages="messages" :user="user" />
-      <div class="flex gap-4">
-        <input
-          type="text"
-          ref="message"
-          class="w-full p-4 rounded"
-          placeholder="Your message"
-          v-model="message"
-          @keyup.enter.prevent="sendMessage"
-        />
-        <ui-button
-          @click="sendMessage"
-          :disabled="!message"
-          :class="{ 'opacity-75 pointer-events-none': !message }"
-          >Send</ui-button
-        >
-      </div>
+      <Conversation :messages="messages" :user="user" />
+      <Texter
+        :socket="socket"
+        @message="messages.push({ ...$event, user })"
+      />
     </div>
   </div>
 </template>
@@ -43,6 +50,7 @@
 import UiButton from "./ui/UiButton.vue";
 import Contacts from "./Contacts.vue";
 import Conversation from "./Conversation.vue";
+import Texter from "./Texter.vue";
 
 const sounds = {
   online: new Audio("online.mp3"),
@@ -50,7 +58,7 @@ const sounds = {
 };
 
 export default {
-  components: { UiButton, Contacts, Conversation },
+  components: { UiButton, Contacts, Conversation, Texter },
   props: {
     user: {
       type: Object,
@@ -64,22 +72,10 @@ export default {
   data() {
     return {
       messages: [],
-      users: {},
       rooms: {},
       message: undefined,
       typingUsers: [],
     };
-  },
-  computed: {
-    filteredUsers() {
-      return Object.values(this.users).filter(
-        (data) => data.user.id !== this.user.id
-      );
-    },
-
-    typing() {
-      return Boolean(this.message);
-    },
   },
   mounted() {
     this.socket.on("new message", (data) => {
@@ -90,18 +86,14 @@ export default {
 
     this.socket.on("user joined", (data) => {
       this.play("online");
-      this.users[data.user.id] = data;
     });
 
     this.socket.on("user left", (data) => {
       this.play("typing");
-
-      delete this.users[data.user.id];
     });
 
     this.socket.on("typing", (data) => {
       this.play("typing");
-
       this.typingUsers.push(data.user.id);
     });
 
@@ -126,21 +118,6 @@ export default {
     });
   },
   methods: {
-    sendMessage() {
-      if (this.message) {
-        this.socket.emit("new message", this.message);
-
-        this.messages.push({
-          user: this.user,
-          body: this.message,
-          time: new Date(),
-        });
-
-        this.message = undefined;
-
-        this.$refs.message.focus();
-      }
-    },
     logout() {
       localStorage.removeItem("chat-user");
 
@@ -148,11 +125,6 @@ export default {
     },
     play(type = "online") {
       sounds[type].play();
-    },
-  },
-  watch: {
-    typing(value) {
-      this.socket.emit(Boolean(value) ? "typing" : "stop typing");
     },
   },
 };

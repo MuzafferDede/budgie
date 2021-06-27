@@ -26,8 +26,7 @@ export default {
   methods: {
     join(user) {
       this.user = user;
-      this.socket = io("http://localhost:3001");
-
+      this.socket = io("http://localhost:3001", { autoConnect: true });
       // Tell the server your username
       this.socket.emit("add user", user);
     },

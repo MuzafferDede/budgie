@@ -5,10 +5,9 @@ const io = require('socket.io')(3001, {
   }
 })
 
-let numUsers = 0;
+let users = {};
 
 io.on('connection', (socket) => {
-  let addedUser = false;
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
@@ -22,19 +21,18 @@ io.on('connection', (socket) => {
 
   // when the client emits 'add user', this listens and executes
   socket.on('add user', (user) => {
-    if (addedUser) return;
 
     // we store the user in the socket session for this client
     socket.user = user;
-    ++numUsers;
-    addedUser = true;
+    users[socket.id] = user;
+
     socket.emit('login', {
-      numUsers: numUsers
+      users: users
     });
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
       user: socket.user,
-      numUsers: numUsers
+      users: users
     });
 
   });
@@ -46,6 +44,22 @@ io.on('connection', (socket) => {
     });
   });
 
+    // add contact
+    socket.on('add contact', (id) => {
+      const found = Object.keys(users).find(user => users[user].id === id);
+      if(found) {
+        io.to(found).emit('contact request', socket.user);
+      }
+    });
+
+    // accept request
+    socket.on('accept request', (contact) => {
+      const found = Object.keys(users).find(user => users[user].id === contact.id);
+      if(found) {
+        io.to(found).emit('request accepted', socket.user)
+      }
+    });
+
   // when the client emits 'stop typing', we broadcast it to others
   socket.on('stop typing', () => {
     socket.broadcast.emit('stop typing', {
@@ -55,15 +69,13 @@ io.on('connection', (socket) => {
 
   // when the user disconnects.. perform this
   socket.on('disconnect', () => {
-    if (addedUser) {
-      --numUsers;
-
       // echo globally that this client has left
       socket.broadcast.emit('user left', {
         user: socket.user,
-        numUsers: numUsers
+        users: users
       });
-    }
+
+      delete users[socket.id]
   });
 });
 
