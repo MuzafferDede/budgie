@@ -1,6 +1,6 @@
 <template>
   <div class="bg-indigo-400 min-h-screen lg:h-screen flex">
-    <Login v-if="!user" @login="join($event)" />
+    <Login v-if="!user.name" @login="login($event)" />
     <Messenger v-else :user="user" :socket="socket" @logout="logout" />
   </div>
 </template>
@@ -12,28 +12,39 @@ import "./assets/style.css";
 import Login from "./components/Login.vue";
 import Messenger from "./components/Messenger.vue";
 
-
 export default {
   components: {
     Login,
     Messenger,
   },
-  data() {
-    return {
-      user: undefined,
-      socket: undefined,
-    };
+
+  computed: {
+    user() {
+      return this.$store.state.user;
+    },
+    socket() {
+      return io("http://localhost:5001", {
+        autoConnect: false,
+      });
+    },
+  },
+  mounted() {
+    this.socket.disconnect();
+
+    this.login(this.user);
   },
   methods: {
-    join(user) {
-      this.user = user;
-      this.socket = io("http://localhost:5001", { autoConnect: true });
-      // Tell the server your username
-      this.socket.emit("add user", user);
+    login(user) {
+      if (this.user && user) {
+        this.socket.connect();
+        this.socket.emit("add user", user);
+
+        this.$store.dispatch("saveUser", user);
+      }
     },
     logout() {
       this.socket.disconnect();
-      this.user = undefined;
+      this.$store.dispatch("deleteUser");
     },
   },
 };

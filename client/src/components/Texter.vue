@@ -26,6 +26,10 @@ export default {
       type: Object,
       default: undefined,
     },
+    contact: {
+      type: String,
+      default: undefined
+    }
   },
   data() {
     return {
@@ -35,7 +39,7 @@ export default {
   methods: {
     sendMessage() {
       if (this.message) {
-        this.socket.emit("new message", this.message);
+        this.socket.emit("new message", this.message, this.contact);
 
         this.$emit('message', {
           body: this.message,

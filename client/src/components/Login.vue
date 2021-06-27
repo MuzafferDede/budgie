@@ -67,7 +67,6 @@ export default {
       if (this.name) {
         const id = uuid();
         this.$emit("login", { name: this.name, id });
-        this.$store.dispatch('saveUser', { name: this.name, id })
         return;
       }
 

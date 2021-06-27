@@ -8,11 +8,11 @@ const io = require('socket.io')(5001, {
 let users = {};
 
 io.on('connection', (socket) => {
-
   // when the client emits 'new message', this listens and executes
-  socket.on('new message', (data) => {
+  socket.on('new message', (data, id) => {
+    const found = Object.keys(users).find(user => users[user].id === id);
     // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
+    socket.to(found).emit('new message', {
       user: socket.user,
       body: data,
       time: new Date()

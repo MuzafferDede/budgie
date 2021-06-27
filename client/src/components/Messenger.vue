@@ -13,7 +13,7 @@
         lg:h-auto
       "
     >
-      <Contacts :typers="typingUsers" :socket="socket"/>
+      <Contacts :typers="typingUsers" :socket="socket" @set-contact="contact = $event"/>
       <div
         class="
           w-full
@@ -36,9 +36,12 @@
         </div>
       </div>
     </div>
-    <div class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto">
+    <div class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto" 
+      v-if="contact"
+    >
       <Conversation :messages="messages" :user="user" />
       <Texter
+        :contact="contact"
         :socket="socket"
         @message="messages.push({ ...$event, user })"
       />
@@ -71,6 +74,7 @@ export default {
   },
   data() {
     return {
+      contact: undefined,
       messages: [],
       rooms: {},
       message: undefined,
@@ -107,10 +111,6 @@ export default {
 
     this.socket.on("reconnect", () => {
       console.log("you have been reconnected");
-
-      if (user) {
-        socket.emit("add user", user);
-      }
     });
 
     this.socket.on("reconnect_error", () => {

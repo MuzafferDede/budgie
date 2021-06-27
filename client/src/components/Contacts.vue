@@ -71,6 +71,7 @@
       <div
         class="
           bg-gray-100
+          cursor-pointer
           group
           rounded
           p-3
@@ -84,6 +85,7 @@
         "
         v-for="contact in contacts"
         :key="contact.id"
+        @click="$emit('set-contact',contact.id)"
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
         <span>{{ contact.name }}</span>
@@ -138,10 +140,10 @@ export default {
       };
     },
     contacts() {
-      return this.$store.state.user.contacts;
+      return this.$store.state.user.contacts || {};
     },
     requests() {
-      return this.$store.state.user.requests;
+      return this.$store.state.user.requests || {};
     },
   },
   mounted() {

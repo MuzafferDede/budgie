@@ -1,18 +1,25 @@
 export default {
-    state: {
-        contacts: {},
-        requests: {}
-    },
+    state: () => {},
     getters: {},
     mutations: {
         SET_USER(state, payload) {
             state.name = payload.name
             state.id = payload.id
         },
+        DELETE_USER(state) {
+            delete state.name
+            delete state.id
+            delete state.contacts
+            delete state.requests
+        },
         ADD_CONTACT(state, payload) {
+            if(!state.contacts) state.contacts = {}
+
             state.contacts[payload.id] = payload;
         },
         ADD_REQUEST(state, payload) {
+            if(!state.requests) state.requests = {}
+
             state.requests[payload.id] = payload;
         },
         REMOVE_CONTACT(state, payload) {
@@ -25,6 +32,9 @@ export default {
     actions: {
         saveUser({ commit }, data) {
             commit('SET_USER', data)
+        },
+        deleteUser({ commit }) {
+            commit('DELETE_USER')
         },
         saveContact({ commit }, data) {
             commit('ADD_CONTACT', data)

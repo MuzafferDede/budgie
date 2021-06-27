@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import moment from "moment";
+import moment from "moment"
 
 export default {
   props: {
@@ -49,15 +49,14 @@ export default {
       type: Array,
       default: () => [],
     },
-    user: {
-      type: Object,
-      default: () => {},
-    },
   },
   computed: {
     time() {
-      return (date) => moment(date).format("LT");
+      return (date) => moment(date).format("LT")
     },
+    user() {
+      return this.$store.state.user
+    }
   },
 };
 </script>
