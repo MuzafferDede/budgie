@@ -26,14 +26,24 @@
               id="contact"
               v-model="contact"
             />
-            <ui-button
-              @click="addContact"
-              :class="{
-                'animate-ping': sent,
-                'opacity-75 pointer-events-none': !contact,
-              }"
-              >{{ sent ? "Sent" : "Request" }}</ui-button
-            >
+            <p v-if="error" class="text-red-500">{{ error }}</p>
+            <div class="flex space-x-4">
+              <ui-button
+                class="w-full"
+                @click="(showAddContact = false), (contact = undefined)"
+                color="blue"
+                >Cancel</ui-button
+              >
+              <ui-button
+                @click="addContact"
+                class="w-full"
+                :class="{
+                  'animate-ping': sent,
+                  'opacity-75 pointer-events-none': !contact,
+                }"
+                >{{ sent ? "Sent" : "Request" }}</ui-button
+              >
+            </div>
           </div>
         </div>
       </div>
@@ -61,6 +71,7 @@
       <div
         class="
           bg-gray-100
+          group
           rounded
           p-3
           w-full
@@ -76,11 +87,20 @@
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
         <span>{{ contact.name }}</span>
-        <span
-          class="italic ml-auto text-sm text-gray-400 animate-pulse"
-          v-if="isTyping(contact.id)"
-          >typing...</span
-        >
+        <div class="ml-auto flex items-center space-x-2">
+          <ui-button
+            class="text-xs hidden group-hover:block"
+            color="red"
+            size="sm"
+            @click="$store.dispatch('deleteContact', contact)"
+            >Remove</ui-button
+          >
+          <span
+            class="italic text-sm text-gray-400 animate-pulse"
+            v-if="isTyping(contact.id)"
+            >typing...</span
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -95,8 +115,7 @@ export default {
       showAddContact: false,
       sent: false,
       contact: "",
-      requests: {},
-      contacts: {},
+      error: "",
     };
   },
   props: {
@@ -118,19 +137,28 @@ export default {
         return this.typers.includes(id);
       };
     },
+    contacts() {
+      return this.$store.state.user.contacts;
+    },
+    requests() {
+      return this.$store.state.user.requests;
+    },
   },
   mounted() {
     this.socket.on("contact request", (contact) => {
-      this.requests[contact.id] = contact;
+      this.$store.dispatch("saveRequest", contact);
     });
 
-    this.socket.on('request accepted',(contact) => {
-      this.contacts[contact.id] = contact;
-    })
+    this.socket.on("request accepted", (contact) => {
+      this.$store.dispatch("saveContact", contact);
+    });
   },
   methods: {
     addContact() {
-      if (!this.contact) return;
+      if (!this.contact || this.contact === this.$store.state.user.id) {
+        this.error = "We could not add this user";
+        return;
+      }
 
       this.socket.emit("add contact", this.contact);
       this.sent = true;
@@ -143,11 +171,11 @@ export default {
     },
     accept(request) {
       this.socket.emit("accept request", request);
-      this.contacts[request.id] = request;
-      delete this.requests[request.id];
+      this.$store.dispatch("saveContact", request);
+      this.$store.dispatch("deleteRequest", request);
     },
     reject(request) {
-      delete this.requests[request.id];
+      this.$store.dispatch("deleteRequest", request);
     },
   },
 };

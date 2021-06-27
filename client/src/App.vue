@@ -12,6 +12,7 @@ import "./assets/style.css";
 import Login from "./components/Login.vue";
 import Messenger from "./components/Messenger.vue";
 
+
 export default {
   components: {
     Login,
@@ -26,7 +27,7 @@ export default {
   methods: {
     join(user) {
       this.user = user;
-      this.socket = io("http://localhost:3001", { autoConnect: true });
+      this.socket = io("http://localhost:5001", { autoConnect: true });
       // Tell the server your username
       this.socket.emit("add user", user);
     },

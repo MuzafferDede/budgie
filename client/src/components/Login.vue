@@ -53,10 +53,13 @@ export default {
     };
   },
   mounted() {
-    const user = JSON.parse(localStorage.getItem("chat-user"));
-
-    if (user !== null) {
-      this.$emit("login", user);
+    if (this.user.name) {
+      this.$emit("login", this.user);
+    }
+  },
+  computed: {
+    user() {
+      return this.$store.state.user;
     }
   },
   methods: {
@@ -64,11 +67,7 @@ export default {
       if (this.name) {
         const id = uuid();
         this.$emit("login", { name: this.name, id });
-        localStorage.setItem(
-          "chat-user",
-          JSON.stringify({ name: this.name, id })
-        );
-
+        this.$store.dispatch('saveUser', { name: this.name, id })
         return;
       }
 
