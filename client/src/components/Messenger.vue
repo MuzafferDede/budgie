@@ -13,7 +13,12 @@
         lg:h-auto
       "
     >
-      <Contacts :typers="typingUsers" :socket="socket" @set-contact="contact = $event"/>
+      <Contacts
+        :typers="typingUsers"
+        :messages="messages"
+        :socket="socket"
+        @set-contact="contact = $event"
+      />
       <div
         class="
           w-full
@@ -36,10 +41,15 @@
         </div>
       </div>
     </div>
-    <div class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto" 
+    <div
+      class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto"
       v-if="contact"
     >
-      <Conversation :messages="messages" :user="user" />
+      <Conversation
+        :messages="messages"
+        :user="user"
+        @close="contact = undefined"
+      />
       <Texter
         :contact="contact"
         :socket="socket"
@@ -56,7 +66,8 @@ import Conversation from "./Conversation.vue";
 import Texter from "./Texter.vue";
 
 const sounds = {
-  online: new Audio("online.mp3"),
+  notify: new Audio("notify.mp3"),
+  error: new Audio("error.mp3"),
   typing: new Audio("typing.mp3"),
 };
 
@@ -75,25 +86,22 @@ export default {
   data() {
     return {
       contact: undefined,
-      messages: [],
-      rooms: {},
       message: undefined,
+      messages: [],
       typingUsers: [],
     };
   },
   mounted() {
     this.socket.on("new message", (data) => {
-      this.play("typing");
-
+      if(!this.$store.getters['client/user'].vision) {
+          this.play("notify");
+      }
+      data = {...data, seen: false}
       this.messages.push(data);
     });
 
-    this.socket.on("user joined", (data) => {
-      this.play("online");
-    });
-
-    this.socket.on("user left", (data) => {
-      this.play("typing");
+    this.socket.on("contact left", (contact) => {
+      //this.$store.dispatch('contacts/setStatus', contact)
     });
 
     this.socket.on("typing", (data) => {
@@ -107,14 +115,6 @@ export default {
 
     this.socket.on("disconnect", () => {
       console.log("you have been disconnected");
-    });
-
-    this.socket.on("reconnect", () => {
-      console.log("you have been reconnected");
-    });
-
-    this.socket.on("reconnect_error", () => {
-      console.log("attempt to reconnect has failed");
     });
   },
   methods: {

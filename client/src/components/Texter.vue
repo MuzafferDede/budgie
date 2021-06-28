@@ -55,7 +55,7 @@ export default {
   watch: {
     message(value, oldValue) {
       if(Boolean(value) !== Boolean(oldValue)) {
-        this.socket.emit(Boolean(value) ? "typing" : "stop typing");
+        this.socket.emit(Boolean(value) ? "typing" : "stop typing", this.contact);
       }
     }
   }

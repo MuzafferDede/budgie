@@ -1,5 +1,8 @@
 <template>
-  <div class="flex-1 flex flex-col bg-white rounded p-4 overflow-hidden">
+  <div class="flex-1 flex flex-col bg-white rounded p-4 overflow-hidden relative">
+    <button @click="$emit('close')" class="absolute right-0 top-0 w-8 h-8 hover:text-blue-500" title="Close">
+      <span class="transform rotate-45 block text-2xl">+</span>
+    </button>
     <div class="overflow-auto">
       <div
         v-for="(message, index) in messages"
@@ -55,7 +58,7 @@ export default {
       return (date) => moment(date).format("LT")
     },
     user() {
-      return this.$store.state.user
+      return this.$store.getters['client/user']
     }
   },
 };

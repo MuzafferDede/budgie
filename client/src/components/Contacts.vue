@@ -57,7 +57,7 @@
           justify-between
           items-center
         "
-        v-for="request in filteredRequests"
+        v-for="request in requests"
         :key="request.id"
       >
         <span>{{ request.name }}</span>
@@ -85,16 +85,31 @@
         "
         v-for="contact in contacts"
         :key="contact.id"
-        @click="$emit('set-contact',contact.id)"
+        @click="$emit('set-contact', contact.id)"
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-        <span>{{ contact.name }}</span>
+        <span
+          >{{ contact.name }}
+          <span
+            class="
+              bg-red-500
+              text-white text-xs
+              rounded-full
+              w-5
+              h-5
+              inline-flex
+              items-center
+              justify-center
+            "
+            >{{ notSeen(contact.id) }}</span
+          ></span
+        >
         <div class="ml-auto flex items-center space-x-2">
           <ui-button
             class="text-xs hidden group-hover:block"
             color="red"
             size="sm"
-            @click="$store.dispatch('deleteContact', contact)"
+            @click="$store.dispatch('contacts/delete', contact)"
             >Remove</ui-button
           >
           <span
@@ -116,12 +131,16 @@ export default {
     return {
       showAddContact: false,
       sent: false,
-      contact: "",
-      error: "",
+      contact: undefined,
+      error: undefined,
     };
   },
   props: {
     typers: {
+      type: Array,
+      default: () => [],
+    },
+    messages: {
       type: Array,
       default: () => [],
     },
@@ -131,33 +150,44 @@ export default {
     },
   },
   computed: {
-    filteredRequests() {
-      return Object.values(this.requests);
-    },
     isTyping() {
       return (id) => {
         return this.typers.includes(id);
       };
     },
+    notSeen() {
+      return (id) => {
+        return this.messages.reduce((current, next) => {
+          if (!next.seen && next.user.id === id) {
+            current++;
+          }
+          return current;
+        }, 0);
+      };
+    },
     contacts() {
-      return this.$store.state.user.contacts || {};
+      return this.$store.getters["contacts/contacts"].items || [];
     },
     requests() {
-      return this.$store.state.user.requests || {};
+      return this.$store.getters["requests/requests"].items || [];
     },
   },
   mounted() {
     this.socket.on("contact request", (contact) => {
-      this.$store.dispatch("saveRequest", contact);
+      this.$store.dispatch("requests/save", contact);
     });
 
     this.socket.on("request accepted", (contact) => {
-      this.$store.dispatch("saveContact", contact);
+      console.log(contact);
+      this.$store.dispatch("contacts/save", contact);
     });
   },
   methods: {
     addContact() {
-      if (!this.contact || this.contact === this.$store.state.user.id) {
+      if (
+        !this.contact ||
+        this.contact === this.$store.getters["client/user"].id
+      ) {
         this.error = "We could not add this user";
         return;
       }
@@ -172,12 +202,12 @@ export default {
       }, 500);
     },
     accept(request) {
-      this.socket.emit("accept request", request);
-      this.$store.dispatch("saveContact", request);
-      this.$store.dispatch("deleteRequest", request);
+      this.socket.emit("accept request", request.id);
+      this.$store.dispatch("contacts/save", request);
+      this.$store.dispatch("requests/delete", request);
     },
     reject(request) {
-      this.$store.dispatch("deleteRequest", request);
+      this.$store.dispatch("requests/delete", request);
     },
   },
 };

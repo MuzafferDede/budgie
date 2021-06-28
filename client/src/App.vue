@@ -20,7 +20,7 @@ export default {
 
   computed: {
     user() {
-      return this.$store.state.user;
+      return this.$store.getters['client/user'];
     },
     socket() {
       return io("http://localhost:5001", {
@@ -30,21 +30,23 @@ export default {
   },
   mounted() {
     this.socket.disconnect();
-
-    this.login(this.user);
+    
+    if(this.user.name){
+      this.login(this.user);
+    }
   },
   methods: {
     login(user) {
       if (this.user && user) {
         this.socket.connect();
-        this.socket.emit("add user", user);
+        this.socket.emit("register", user);
 
-        this.$store.dispatch("saveUser", user);
+        this.$store.dispatch("client/save", user);
       }
     },
     logout() {
       this.socket.disconnect();
-      this.$store.dispatch("deleteUser");
+      this.$store.dispatch("client/delete");
     },
   },
 };

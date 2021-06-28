@@ -43,34 +43,30 @@
 </template>
 
 <script>
-import { v4 as uuid } from "uuid";
+import { v4 as userId } from "uuid";
 
 export default {
   data() {
     return {
       name: undefined,
-      error: "",
+      error: undefined,
     };
   },
   mounted() {
-    if (this.user.name) {
+    if (this.user && this.user.name) {
       this.$emit("login", this.user);
     }
   },
   computed: {
     user() {
-      return this.$store.state.user;
-    }
+      return this.$store.getters['client/user'];
+    },
   },
   methods: {
     login() {
-      if (this.name) {
-        const id = uuid();
-        this.$emit("login", { name: this.name, id });
-        return;
-      }
-
-      this.error = "Please enter your name";
+      this.name
+        ? this.$emit("login", { id: userId(), name: this.name })
+        : (this.error = "Please enter your name");
     },
   },
 };

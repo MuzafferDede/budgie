@@ -1,10 +1,14 @@
 import { createStore } from 'vuex'
-import user from './modules/user'
+import client from './modules/client'
+import contacts from './modules/contacts'
+import requests from './modules/requests'
 import createPersistedState from "vuex-persistedstate";
 
 const store = createStore({
     modules: {
-        user,
+        client,
+        contacts,
+        requests,
     },
     plugins: [createPersistedState()],
 })
