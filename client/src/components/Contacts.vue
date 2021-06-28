@@ -91,6 +91,7 @@
         <span
           >{{ contact.name }}
           <span
+          v-if="notSeen(contact.id)"
             class="
               bg-red-500
               text-white text-xs
@@ -157,10 +158,9 @@ export default {
     },
     notSeen() {
       return (id) => {
-        return this.messages.reduce((current, next) => {
-          if (!next.seen && next.user.id === id) {
-            current++;
-          }
+        return this.messages.filter(message => message.new).reduce((current, next) => {
+          next.user.id === id && current++
+          
           return current;
         }, 0);
       };
@@ -178,7 +178,6 @@ export default {
     });
 
     this.socket.on("request accepted", (contact) => {
-      console.log(contact);
       this.$store.dispatch("contacts/save", contact);
     });
   },

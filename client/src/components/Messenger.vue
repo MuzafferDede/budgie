@@ -17,7 +17,7 @@
         :typers="typingUsers"
         :messages="messages"
         :socket="socket"
-        @set-contact="contact = $event"
+        @set-contact="setContact"
       />
       <div
         class="
@@ -93,10 +93,12 @@ export default {
   },
   mounted() {
     this.socket.on("new message", (data) => {
-      if(!this.$store.getters['client/user'].vision) {
-          this.play("notify");
+      if (this.contact !== data.user.id) {
+        data = { ...data, new: true };
+
+        this.play("notify");
       }
-      data = {...data, seen: false}
+
       this.messages.push(data);
     });
 
@@ -105,7 +107,9 @@ export default {
     });
 
     this.socket.on("typing", (data) => {
-      this.play("typing");
+      if (this.contact === data.user.id) {
+        this.play("typing");
+      }
       this.typingUsers.push(data.user.id);
     });
 
@@ -125,6 +129,15 @@ export default {
     },
     play(type = "online") {
       sounds[type].play();
+    },
+    setContact(contact) {
+      this.contact = contact;
+      this.messages.map((message) => {
+        if (message.user.id === contact) {
+          delete message.new
+        }
+        return message;
+      });
     },
   },
 };
