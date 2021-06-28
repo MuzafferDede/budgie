@@ -15,9 +15,7 @@
     >
       <Contacts
         :typers="typingUsers"
-        :messages="messages"
         :socket="socket"
-        @set-contact="setContact"
       />
       <div
         class="
@@ -43,18 +41,10 @@
     </div>
     <div
       class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto"
-      v-if="contact"
+      v-if="user.contact"
     >
-      <Conversation
-        :messages="messages"
-        :user="user"
-        @close="contact = undefined"
-      />
-      <Texter
-        :contact="contact"
-        :socket="socket"
-        @message="messages.push({ ...$event, user })"
-      />
+      <Conversation />
+      <Texter :socket="socket" />
     </div>
   </div>
 </template>
@@ -74,10 +64,6 @@ const sounds = {
 export default {
   components: { UiButton, Contacts, Conversation, Texter },
   props: {
-    user: {
-      type: Object,
-      default: undefined,
-    },
     socket: {
       type: Object,
       default: undefined,
@@ -85,21 +71,23 @@ export default {
   },
   data() {
     return {
-      contact: undefined,
       message: undefined,
-      messages: [],
       typingUsers: [],
     };
   },
+  computed: {
+    user() {
+      return this.$store.getters["client/user"];
+    },
+  },
   mounted() {
     this.socket.on("new message", (data) => {
-      if (this.contact !== data.user.id) {
+      if (this.user.contact !== data.user.id) {
         data = { ...data, new: true };
 
         this.play("notify");
       }
-
-      this.messages.push(data);
+      this.$store.dispatch("messages/save", data);
     });
 
     this.socket.on("contact left", (contact) => {
@@ -107,7 +95,7 @@ export default {
     });
 
     this.socket.on("typing", (data) => {
-      if (this.contact === data.user.id) {
+      if (this.user.contact === data.user.id) {
         this.play("typing");
       }
       this.typingUsers.push(data.user.id);
@@ -129,15 +117,6 @@ export default {
     },
     play(type = "online") {
       sounds[type].play();
-    },
-    setContact(contact) {
-      this.contact = contact;
-      this.messages.map((message) => {
-        if (message.user.id === contact) {
-          delete message.new
-        }
-        return message;
-      });
     },
   },
 };

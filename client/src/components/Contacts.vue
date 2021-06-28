@@ -24,14 +24,11 @@
               type="text"
               name="contact"
               id="contact"
-              v-model="contact"
+              v-model="contactId"
             />
             <p v-if="error" class="text-red-500">{{ error }}</p>
             <div class="flex space-x-4">
-              <ui-button
-                class="w-full"
-                @click="(showAddContact = false), (contact = undefined)"
-                color="blue"
+              <ui-button class="w-full" @click="cancel" color="blue"
                 >Cancel</ui-button
               >
               <ui-button
@@ -39,7 +36,7 @@
                 class="w-full"
                 :class="{
                   'animate-ping': sent,
-                  'opacity-75 pointer-events-none': !contact,
+                  'opacity-75 pointer-events-none': !contactId,
                 }"
                 >{{ sent ? "Sent" : "Request" }}</ui-button
               >
@@ -83,15 +80,14 @@
           gap-1
           items-center
         "
-        v-for="contact in contacts"
-        :key="contact.id"
-        @click="$emit('set-contact', contact.id)"
+        v-for="item in contacts"
+        :key="item.id"
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-        <span
-          >{{ contact.name }}
+        <span @click="$store.dispatch('client/setConversation', item.id)"
+          >{{ item.name }}
           <span
-          v-if="notSeen(contact.id)"
+            v-if="notSeen(item.id)"
             class="
               bg-red-500
               text-white text-xs
@@ -102,7 +98,7 @@
               items-center
               justify-center
             "
-            >{{ notSeen(contact.id) }}</span
+            >{{ notSeen(item.id) }}</span
           ></span
         >
         <div class="ml-auto flex items-center space-x-2">
@@ -110,12 +106,12 @@
             class="text-xs hidden group-hover:block"
             color="red"
             size="sm"
-            @click="$store.dispatch('contacts/delete', contact)"
+            @click="removeContact(item)"
             >Remove</ui-button
           >
           <span
             class="italic text-sm text-gray-400 animate-pulse"
-            v-if="isTyping(contact.id)"
+            v-if="isTyping(item.id)"
             >typing...</span
           >
         </div>
@@ -132,16 +128,12 @@ export default {
     return {
       showAddContact: false,
       sent: false,
-      contact: undefined,
+      contactId: undefined,
       error: undefined,
     };
   },
   props: {
     typers: {
-      type: Array,
-      default: () => [],
-    },
-    messages: {
       type: Array,
       default: () => [],
     },
@@ -156,13 +148,21 @@ export default {
         return this.typers.includes(id);
       };
     },
+    messages() {
+      const items = this.$store.getters["messages/messages"].items;
+      return items
+        ? items
+        : [];
+    },
     notSeen() {
       return (id) => {
-        return this.messages.filter(message => message.new).reduce((current, next) => {
-          next.user.id === id && current++
-          
-          return current;
-        }, 0);
+        return this.messages
+          .filter((message) => message.new)
+          .reduce((current, next) => {
+            next.user.id === id && current++;
+
+            return current;
+          }, 0);
       };
     },
     contacts() {
@@ -170,6 +170,9 @@ export default {
     },
     requests() {
       return this.$store.getters["requests/requests"].items || [];
+    },
+    user() {
+      return this.$store.getters["client/user"];
     },
   },
   mounted() {
@@ -183,30 +186,42 @@ export default {
   },
   methods: {
     addContact() {
+      this.error = undefined
       if (
-        !this.contact ||
-        this.contact === this.$store.getters["client/user"].id
+        !this.contactId ||
+        this.contactId === this.$store.getters["client/user"].id
       ) {
         this.error = "We could not add this user";
         return;
       }
 
-      this.socket.emit("add contact", this.contact);
-      this.sent = true;
-      this.contact = undefined;
+      this.socket.emit("add contact", this.contactId);
 
-      setTimeout(() => {
-        this.showAddContact = false;
-        this.sent = false;
-      }, 500);
+      this.sent = true;
+      this.contactId = undefined;
+
+      //setTimeout(() => {
+      this.showAddContact = false;
+      this.sent = false;
+      //}, 500)
+    },
+    removeContact(contact) {
+      this.$store.dispatch("contacts/delete", contact);
+
+      this.$store.dispatch("client/setConversation", undefined);
     },
     accept(request) {
       this.socket.emit("accept request", request.id);
+
       this.$store.dispatch("contacts/save", request);
-      this.$store.dispatch("requests/delete", request);
     },
     reject(request) {
       this.$store.dispatch("requests/delete", request);
+    },
+    cancel() {
+      this.showAddContact = false;
+      this.contactId = undefined;
+      this.error = undefined
     },
   },
 };

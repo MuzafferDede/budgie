@@ -1,7 +1,7 @@
 {
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --open --port 5000",
+    "dev": "vite --open --port 5000 --host",
     "build": "vite build",
     "serve": "vite preview"
   },

@@ -1,7 +1,7 @@
 <template>
   <div class="bg-indigo-400 min-h-screen lg:h-screen flex">
     <Login v-if="!user.name" @login="login($event)" />
-    <Messenger v-else :user="user" :socket="socket" @logout="logout" />
+    <Messenger v-else :socket="socket" @logout="logout" />
   </div>
 </template>
 
@@ -47,6 +47,9 @@ export default {
     logout() {
       this.socket.disconnect();
       this.$store.dispatch("client/delete");
+      this.$store.dispatch("contacts/deleteAll");
+      this.$store.dispatch("requests/deleteAll");
+      this.$store.dispatch("messages/deleteAll");
     },
   },
 };

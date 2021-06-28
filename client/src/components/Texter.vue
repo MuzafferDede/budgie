@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import UiButton from './ui/UiButton.vue';
+import UiButton from "./ui/UiButton.vue";
 export default {
   components: { UiButton },
   props: {
@@ -26,25 +26,22 @@ export default {
       type: Object,
       default: undefined,
     },
-    contact: {
-      type: String,
-      default: undefined
-    }
   },
   data() {
     return {
-      message: undefined
-    }
+      message: undefined,
+    };
   },
   methods: {
     sendMessage() {
       if (this.message) {
-        this.socket.emit("new message", this.message, this.contact);
-
-        this.$emit('message', {
+        this.$store.dispatch("messages/save", {
+          user: this.user,
           body: this.message,
           time: new Date(),
-        })
+        });
+        
+        this.socket.emit("new message", this.message, this.user.contact);
 
         this.message = undefined;
 
@@ -52,12 +49,20 @@ export default {
       }
     },
   },
+  computed: {
+    user() {
+      return this.$store.getters['client/user'];
+    },
+  },
   watch: {
     message(value, oldValue) {
-      if(Boolean(value) !== Boolean(oldValue)) {
-        this.socket.emit(Boolean(value) ? "typing" : "stop typing", this.contact);
+      if (Boolean(value) !== Boolean(oldValue)) {
+        this.socket.emit(
+          Boolean(value) ? "typing" : "stop typing",
+          this.user.contact
+        );
       }
-    }
-  }
+    },
+  },
 };
 </script>

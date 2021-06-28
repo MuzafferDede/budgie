@@ -1,6 +1,12 @@
 <template>
-  <div class="flex-1 flex flex-col bg-white rounded p-4 overflow-hidden relative">
-    <button @click="$emit('close')" class="absolute right-0 top-0 w-8 h-8 hover:text-blue-500" title="Close">
+  <div
+    class="flex-1 flex flex-col bg-white rounded p-4 overflow-hidden relative"
+  >
+    <button
+      @click="$store.dispatch('client/setConversation', undefined)"
+      class="absolute right-0 top-0 w-8 h-8 hover:text-blue-500"
+      title="Close"
+    >
       <span class="transform rotate-45 block text-2xl">+</span>
     </button>
     <div class="overflow-auto">
@@ -44,22 +50,22 @@
 </template>
 
 <script>
-import moment from "moment"
+import moment from "moment";
 
 export default {
-  props: {
-    messages: {
-      type: Array,
-      default: () => [],
-    },
-  },
   computed: {
     time() {
-      return (date) => moment(date).format("LT")
+      return (date) => moment(date).format("LT");
     },
     user() {
-      return this.$store.getters['client/user']
-    }
+      return this.$store.getters["client/user"];
+    },
+    messages() {
+      const items = this.$store.getters["messages/messages"].items;
+      return items
+        ? items.filter((message) => message.user.id === this.user.contact)
+        : [];
+    },
   },
 };
 </script>

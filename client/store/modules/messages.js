@@ -2,7 +2,7 @@ export default {
     namespaced: true,
     state: () => { },
     getters: {
-        requests: state => {
+        messages: state => {
             return state
         }
     },
@@ -10,23 +10,31 @@ export default {
         ADD(state, payload) {
             state.items = state.items || []
 
-            state.items = state.items.filter(item => item.id !== payload.id)
-
             state.items.push(payload)
         },
-        REMOVE(state, payload) {
-            state.items = (state.items || []).filter(item => item.id !== payload.id)
+        DELETE(state, payload) {
+            state.items = (state.items || []).filter(message => message.user && message.user.id === payload)
         },
         REMOVE_ALL(state) {
             delete state.items
+        },
+        SEEN(state, payload) {
+            (state.items || []).map(message => {
+                if (message.user && message.user.id === payload) {
+                    delete message.new
+                }
+            })
         },
     },
     actions: {
         save({ commit }, data) {
             commit('ADD', data)
         },
+        read({ commit }, data) {
+            commit('SEEN', data)
+        },
         delete({ commit }, data) {
-            commit('REMOVE', data)
+            commit('DELETE', data)
         },
         deleteAll({ commit }) {
             commit('REMOVE_ALL')

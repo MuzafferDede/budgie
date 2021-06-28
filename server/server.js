@@ -21,6 +21,7 @@ io.on('connection', (socket) => {
 
   socket.on('new message', (data, id) => {
     const contact = users.find(user => user.id === id);
+    
     socket.to(contact.socketId).emit('new message', {
       user: socket.user,
       body: data,
