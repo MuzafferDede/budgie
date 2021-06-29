@@ -13,14 +13,14 @@ export default {
             state.items.push(payload)
         },
         DELETE(state, payload) {
-            state.items = (state.items || []).filter(message => message.user && message.user.id === payload)
+            state.items = (state.items || []).filter(message => message.sender === payload)
         },
         REMOVE_ALL(state) {
             delete state.items
         },
         SEEN(state, payload) {
             (state.items || []).map(message => {
-                if (message.user && message.user.id === payload) {
+                if (message.sender === payload) {
                     delete message.new
                 }
             })

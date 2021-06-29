@@ -84,7 +84,7 @@
         :key="item.id"
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-        <span @click="$store.dispatch('client/setConversation', item.id)"
+        <span @click="$store.dispatch('contacts/setContact', item.id)"
           >{{ item.name }}
           <span
             v-if="notSeen(item.id)"
@@ -159,7 +159,7 @@ export default {
         return this.messages
           .filter((message) => message.new)
           .reduce((current, next) => {
-            next.user.id === id && current++;
+            next.sender === id && current++;
 
             return current;
           }, 0);
@@ -170,9 +170,6 @@ export default {
     },
     requests() {
       return this.$store.getters["requests/requests"].items || [];
-    },
-    user() {
-      return this.$store.getters["client/user"];
     },
   },
   mounted() {
@@ -208,7 +205,7 @@ export default {
     removeContact(contact) {
       this.$store.dispatch("contacts/delete", contact);
 
-      this.$store.dispatch("client/setConversation", undefined);
+      this.$store.dispatch("contacts/setContact", undefined);
     },
     accept(request) {
       this.socket.emit("accept request", request.id);

@@ -23,7 +23,7 @@ export default {
       return this.$store.getters['client/user'];
     },
     socket() {
-      return io("http://localhost:5001", {
+      return io("http://localhost:8080", {
         autoConnect: false,
       });
     },
@@ -46,10 +46,10 @@ export default {
     },
     logout() {
       this.socket.disconnect();
-      this.$store.dispatch("client/delete");
-      this.$store.dispatch("contacts/deleteAll");
-      this.$store.dispatch("requests/deleteAll");
-      this.$store.dispatch("messages/deleteAll");
+
+      this.$store.dispatch("client/delete").then(() => {
+        localStorage.removeItem('vuex')
+      });
     },
   },
 };

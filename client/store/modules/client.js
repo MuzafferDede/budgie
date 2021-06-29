@@ -18,9 +18,6 @@ export default {
         CHANGE_VISION(state, payload) {
             state.vision = payload
         },
-        CHANGE_CONVERSATION(state, payload) {
-            state.contact = payload
-        },
     },
     actions: {
         save({ commit }, data) {
@@ -28,16 +25,9 @@ export default {
         },
         delete({ commit }) {
             commit('DELETE')
-            
-            commit('CHANGE_CONVERSATION', undefined)
         },
         setVision({ commit }, data) {
             commit('CHANGE_VISION', data)
-        },
-        setConversation({ commit, dispatch }, data) {
-            commit('CHANGE_CONVERSATION', data)
-            
-            dispatch('messages/read', data, { root: true })
         },
     }
 }

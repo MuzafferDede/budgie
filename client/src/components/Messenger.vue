@@ -41,7 +41,7 @@
     </div>
     <div
       class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto"
-      v-if="user.contact"
+      v-if="contact"
     >
       <Conversation />
       <Texter :socket="socket" />
@@ -79,14 +79,18 @@ export default {
     user() {
       return this.$store.getters["client/user"];
     },
+    contact() {
+      return this.$store.getters["contacts/contact"];
+    },
   },
   mounted() {
     this.socket.on("new message", (data) => {
-      if (this.user.contact !== data.user.id) {
+      if (!this.contact || this.contact.id !== data.sender ) {
         data = { ...data, new: true };
 
         this.play("notify");
       }
+      
       this.$store.dispatch("messages/save", data);
     });
 
@@ -95,7 +99,7 @@ export default {
     });
 
     this.socket.on("typing", (data) => {
-      if (this.user.contact === data.user.id) {
+      if (this.contact && this.contact.id === data.user.id) {
         this.play("typing");
       }
       this.typingUsers.push(data.user.id);
@@ -116,6 +120,7 @@ export default {
       this.$emit("logout");
     },
     play(type = "online") {
+      sounds[type].currentTime = 0;
       sounds[type].play();
     },
   },

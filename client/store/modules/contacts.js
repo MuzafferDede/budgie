@@ -4,13 +4,15 @@ export default {
     getters: {
         contacts: state => {
             return state
-        }
+        },
+        contact: state => {
+            return state.current
+        },
     },
     mutations: {
         ADD(state, payload) {
-            state.items = state.items || []
 
-            state.items = state.items.filter(item => item.id !== payload.id)
+            state.items = (state.items || []).filter(item => item.id !== payload.id)
 
             state.items.push(payload)
         },
@@ -21,11 +23,17 @@ export default {
             delete state.items
         },
         CHANGE_STATUS(state, payload) {
-            const contact = state.items.find(item => item.id === payload.id)
+            const contact = (state.items || []).find(item => item.id === payload.id)
 
             if (!contact) {
                 contact.online = payload;
             }
+        },
+        CHANGE_CONTACT(state, payload) {
+
+            const contact = (state.items || []).find(item => item.id === payload)
+
+            state.current = contact
         },
     },
     actions: {
@@ -46,6 +54,11 @@ export default {
         },
         setStatus({ commit }, data) {
             commit('CHANGE_STATUS', data)
+        },
+        setContact({ commit, dispatch }, data) {
+            commit('CHANGE_CONTACT', data)
+
+            dispatch('messages/read', data, { root: true })
         },
     }
 }

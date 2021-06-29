@@ -36,12 +36,13 @@ export default {
     sendMessage() {
       if (this.message) {
         this.$store.dispatch("messages/save", {
-          user: this.user,
+          sender: this.user.id,
+          receiver: this.contact.id,
           body: this.message,
           time: new Date(),
         });
-        
-        this.socket.emit("new message", this.message, this.user.contact);
+
+        this.socket.emit("new message", this.message, this.contact.id);
 
         this.message = undefined;
 
@@ -51,7 +52,10 @@ export default {
   },
   computed: {
     user() {
-      return this.$store.getters['client/user'];
+      return this.$store.getters["client/user"];
+    },
+    contact() {
+      return this.$store.getters["contacts/contact"];
     },
   },
   watch: {
@@ -59,7 +63,7 @@ export default {
       if (Boolean(value) !== Boolean(oldValue)) {
         this.socket.emit(
           Boolean(value) ? "typing" : "stop typing",
-          this.user.contact
+          this.contact.id
         );
       }
     },
