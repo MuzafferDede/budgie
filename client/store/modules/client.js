@@ -7,7 +7,7 @@ export default {
         }
     },
     mutations: {
-        SET(state, payload) {
+        ADD_CLIENT(state, payload) {
             state.id = payload.id
             state.name = payload.name
         },
@@ -15,19 +15,13 @@ export default {
             delete state.name
             delete state.id
         },
-        CHANGE_VISION(state, payload) {
-            state.vision = payload
-        },
     },
     actions: {
-        save({ commit }, data) {
-            commit('SET', data)
+        addClient({ commit }, data) {
+            commit('ADD_CLIENT', data)
         },
-        delete({ commit }) {
-            commit('DELETE')
-        },
-        setVision({ commit }, data) {
-            commit('CHANGE_VISION', data)
+        removeClient({ commit }) {
+            commit('REMOVE_CLIENT')
         },
     }
 }

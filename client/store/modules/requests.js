@@ -7,29 +7,29 @@ export default {
         }
     },
     mutations: {
-        ADD(state, payload) {
+        ADD_REQUEST(state, payload) {
             state.items = state.items || []
 
             state.items = state.items.filter(item => item.id !== payload.id)
 
             state.items.push(payload)
         },
-        REMOVE(state, payload) {
+        REMOVE_REQUEST(state, payload) {
             state.items = (state.items || []).filter(item => item.id !== payload.id)
         },
-        REMOVE_ALL(state) {
+        REMOVE_ALL_REQUESTS(state) {
             delete state.items
         },
     },
     actions: {
-        save({ commit }, data) {
-            commit('ADD', data)
+        addRequest({ commit }, data) {
+            commit('ADD_REQUEST', data)
         },
-        delete({ commit }, data) {
-            commit('REMOVE', data)
+        removeRequest({ commit }, data) {
+            commit('REMOVE_REQUEST', data)
         },
-        deleteAll({ commit }) {
-            commit('REMOVE_ALL')
+        removeAllRequests({ commit }) {
+            commit('REMOVE_ALL_REQUESTS')
         },
     }
 }

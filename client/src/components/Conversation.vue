@@ -3,7 +3,7 @@
     class="flex-1 flex flex-col bg-white rounded p-4 overflow-hidden relative"
   >
     <button
-      @click="$store.dispatch('contacts/setContact', undefined)"
+      @click="$store.dispatch('contacts/setCurrentContact', undefined)"
       class="absolute right-0 top-0 w-8 h-8 hover:text-blue-500"
       title="Close"
     >

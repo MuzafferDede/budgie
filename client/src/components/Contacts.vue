@@ -84,7 +84,7 @@
         :key="item.id"
       >
         <span class="inline-block bg-green-400 rounded-full h-2 w-2"></span>
-        <span @click="$store.dispatch('contacts/setContact', item.id)"
+        <span @click="$store.dispatch('contacts/setCurrentContact', item.id)"
           >{{ item.name }}
           <span
             v-if="notSeen(item.id)"
@@ -174,11 +174,11 @@ export default {
   },
   mounted() {
     this.socket.on("contact request", (contact) => {
-      this.$store.dispatch("requests/save", contact);
+      this.$store.dispatch("requests/addRequest", contact);
     });
 
     this.socket.on("request accepted", (contact) => {
-      this.$store.dispatch("contacts/save", contact);
+      this.$store.dispatch("contacts/addContact", contact);
     });
   },
   methods: {
@@ -203,17 +203,17 @@ export default {
       //}, 500)
     },
     removeContact(contact) {
-      this.$store.dispatch("contacts/delete", contact);
+      this.$store.dispatch("contacts/removeContact", contact);
 
-      this.$store.dispatch("contacts/setContact", undefined);
+      this.$store.dispatch("contacts/setCurrentContact", undefined);
     },
     accept(request) {
       this.socket.emit("accept request", request.id);
 
-      this.$store.dispatch("contacts/save", request);
+      this.$store.dispatch("contacts/addContact", request);
     },
     reject(request) {
-      this.$store.dispatch("requests/delete", request);
+      this.$store.dispatch("requests/removeRequest", request);
     },
     cancel() {
       this.showAddContact = false;

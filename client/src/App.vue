@@ -41,13 +41,13 @@ export default {
         this.socket.connect();
         this.socket.emit("register", user);
 
-        this.$store.dispatch("client/save", user);
+        this.$store.dispatch("client/addClient", user);
       }
     },
     logout() {
       this.socket.disconnect();
 
-      this.$store.dispatch("client/delete").then(() => {
+      this.$store.dispatch("client/removeClient").then(() => {
         localStorage.removeItem('vuex')
       });
     },

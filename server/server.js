@@ -43,14 +43,14 @@ io.on('connection', (socket) => {
     socket.user = client
   });
 
-  socket.on('new message', (data, receiver) => {
+  socket.on('new message', (body, receiver) => {
     const client = connectedClients.find(user => user.id === receiver);
 
     if (client) {
       socket.to(client.socketId).emit('new message', {
         sender: socket.user.id,
         receiver: receiver,
-        body: data,
+        body: body,
         time: new Date()
       });
     }
@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', (reason) => {
     socket.broadcast.emit('contact left', socket.user);
-    
+
     connectedClients = connectedClients.filter(client => client.clientId !== socket.client.id)
   });
 });

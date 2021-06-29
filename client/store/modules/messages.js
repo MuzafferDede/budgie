@@ -7,18 +7,18 @@ export default {
         }
     },
     mutations: {
-        ADD(state, payload) {
+        ADD_MESSAGE(state, payload) {
             state.items = state.items || []
 
             state.items.push(payload)
         },
-        DELETE(state, payload) {
+        REMOVE_CONTACT_MESSAGE(state, payload) {
             state.items = (state.items || []).filter(message => message.sender === payload)
         },
-        REMOVE_ALL(state) {
+        REMOVE_ALL_MESSAGES(state) {
             delete state.items
         },
-        SEEN(state, payload) {
+        SET_MESSAGE_STATUS(state, payload) {
             (state.items || []).map(message => {
                 if (message.sender === payload) {
                     delete message.new
@@ -27,17 +27,17 @@ export default {
         },
     },
     actions: {
-        save({ commit }, data) {
-            commit('ADD', data)
+        addMessage({ commit }, data) {
+            commit('ADD_MESSAGE', data)
         },
-        read({ commit }, data) {
-            commit('SEEN', data)
+        removeContactMessage({ commit }, data) {
+            commit('REMOVE_CONTACT_MESSAGE', data)
         },
-        delete({ commit }, data) {
-            commit('DELETE', data)
+        removeAllMessages({ commit }) {
+            commit('REMOVE_ALL_MESSAGES')
         },
-        deleteAll({ commit }) {
-            commit('REMOVE_ALL')
+        setMessageStatus({ commit }, data) {
+            commit('SET_MESSAGE_STATUS', data)
         },
     }
 }

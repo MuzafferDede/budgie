@@ -35,7 +35,7 @@ export default {
   methods: {
     sendMessage() {
       if (this.message) {
-        this.$store.dispatch("messages/save", {
+        this.$store.dispatch("messages/addMessage", {
           sender: this.user.id,
           receiver: this.contact.id,
           body: this.message,

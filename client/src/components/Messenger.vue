@@ -91,11 +91,11 @@ export default {
         this.play("notify");
       }
       
-      this.$store.dispatch("messages/save", data);
+      this.$store.dispatch("messages/addMessage", data);
     });
 
     this.socket.on("contact left", (contact) => {
-      //this.$store.dispatch('contacts/setStatus', contact)
+      //this.$store.dispatch('contacts/setContactStatus', contact)
     });
 
     this.socket.on("typing", (data) => {

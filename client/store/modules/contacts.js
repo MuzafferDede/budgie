@@ -10,26 +10,26 @@ export default {
         },
     },
     mutations: {
-        ADD(state, payload) {
+        ADD_CONTACT(state, payload) {
 
             state.items = (state.items || []).filter(item => item.id !== payload.id)
 
             state.items.push(payload)
         },
-        REMOVE(state, payload) {
+        REMOVE_CONTACT(state, payload) {
             state.items = state.items.filter(item => item.id !== payload.id)
         },
-        REMOVE_ALL(state) {
+        REMOVE_ALL_CONTACTS(state) {
             delete state.items
         },
-        CHANGE_STATUS(state, payload) {
+        SET_CONTACT_STATUS(state, payload) {
             const contact = (state.items || []).find(item => item.id === payload.id)
 
             if (!contact) {
                 contact.online = payload;
             }
         },
-        CHANGE_CONTACT(state, payload) {
+        SET_CURRENT_CONTACT(state, payload) {
 
             const contact = (state.items || []).find(item => item.id === payload)
 
@@ -37,28 +37,28 @@ export default {
         },
     },
     actions: {
-        save({ commit, dispatch }, data) {
-            commit('ADD', data)
+        addContact({ commit, dispatch }, data) {
+            commit('ADD_CONTACT', data)
 
-            dispatch("requests/delete", data, { root: true })
+            dispatch("requests/removeRequest", data, { root: true })
         },
-        delete({ commit, dispatch }, data) {
-            commit('REMOVE', data)
+        removeContact({ commit, dispatch }, data) {
+            commit('REMOVE_CONTACT', data)
 
-            dispatch('messages/delete', data, { root: true })
+            dispatch('messages/removeContactMessages', data, { root: true })
         },
-        deleteAll({ commit, dispatch }) {
-            commit('REMOVE_ALL')
+        removeAllContacts({ commit, dispatch }) {
+            commit('REMOVE_ALL_CONTACTS')
 
-            dispatch('messages/deleteAll', null, { root: true })
+            dispatch('messages/removeAllMessages', null, { root: true })
         },
-        setStatus({ commit }, data) {
-            commit('CHANGE_STATUS', data)
-        },
-        setContact({ commit, dispatch }, data) {
-            commit('CHANGE_CONTACT', data)
+        setCurrentContact({ commit, dispatch }, data) {
+            commit('SET_CURRENT_CONTACT', data)
 
-            dispatch('messages/read', data, { root: true })
+            dispatch('messages/setMessageStatus', data, { root: true })
+        },
+        setContactStatus({ commit }, data) {
+            commit('SET_CONTACT_STATUS', data)
         },
     }
 }
