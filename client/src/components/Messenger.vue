@@ -39,13 +39,16 @@
         </div>
       </div>
     </div>
-    <div
+    <ui-transition 
+      v-show="contact"
+     animation="translate">
+      <div
       class="w-full flex flex-col justify-between gap-4 h-[47vh] lg:h-auto"
-      v-if="contact"
     >
       <Conversation />
       <Texter :socket="socket" />
     </div>
+    </ui-transition>
   </div>
 </template>
 
@@ -54,6 +57,7 @@ import UiButton from "./ui/UiButton.vue";
 import Contacts from "./Contacts.vue";
 import Conversation from "./Conversation.vue";
 import Texter from "./Texter.vue";
+import UiTransition from './ui/UiTransition.vue';
 
 const sounds = {
   notify: new Audio("notify.mp3"),
@@ -62,7 +66,7 @@ const sounds = {
 };
 
 export default {
-  components: { UiButton, Contacts, Conversation, Texter },
+  components: { UiButton, Contacts, Conversation, Texter, UiTransition },
   props: {
     socket: {
       type: Object,

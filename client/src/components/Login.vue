@@ -18,9 +18,11 @@
           @keyup.enter.prevent="login"
           @input="error = ''"
         />
-        <p v-if="!name && error" class="text-red-600 text-sm">
-          {{ error }}
-        </p>
+        <ui-transition animation="pull">
+          <p v-if="!name && error" class="text-red-600 text-sm">
+            {{ error }}
+          </p>
+        </ui-transition>
       </div>
       <div class="w-full flex justify-center">
         <button
@@ -44,8 +46,10 @@
 
 <script>
 import { v4 as userId } from "uuid";
+import UiTransition from './ui/UiTransition.vue';
 
 export default {
+  components: { UiTransition },
   data() {
     return {
       name: undefined,
@@ -53,13 +57,14 @@ export default {
     };
   },
   mounted() {
+    // login if client is exists
     if (this.user && this.user.name) {
       this.$emit("login", this.user);
     }
   },
   computed: {
     user() {
-      return this.$store.getters['client/user'];
+      return this.$store.getters["client/user"];
     },
   },
   methods: {

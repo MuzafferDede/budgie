@@ -26,7 +26,10 @@
               id="contact"
               v-model="contactId"
             />
-            <p v-if="error" class="text-red-500">{{ error }}</p>
+
+            <ui-transition animation="pull">
+              <p v-if="error" class="text-red-500">{{ error }}</p>
+            </ui-transition>
             <div class="flex space-x-4">
               <ui-button class="w-full" @click="cancel" color="blue"
                 >Cancel</ui-button
@@ -122,8 +125,9 @@
 
 <script>
 import UiButton from "./ui/UiButton.vue";
+import UiTransition from "./ui/UiTransition.vue";
 export default {
-  components: { UiButton },
+  components: { UiButton, UiTransition },
   data() {
     return {
       showAddContact: false,
@@ -150,9 +154,7 @@ export default {
     },
     messages() {
       const items = this.$store.getters["messages/messages"].items;
-      return items
-        ? items
-        : [];
+      return items ? items : [];
     },
     notSeen() {
       return (id) => {
@@ -183,7 +185,7 @@ export default {
   },
   methods: {
     addContact() {
-      this.error = undefined
+      this.error = undefined;
       if (
         !this.contactId ||
         this.contactId === this.$store.getters["client/user"].id
@@ -218,7 +220,7 @@ export default {
     cancel() {
       this.showAddContact = false;
       this.contactId = undefined;
-      this.error = undefined
+      this.error = undefined;
     },
   },
 };

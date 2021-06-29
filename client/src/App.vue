@@ -1,7 +1,9 @@
 <template>
   <div class="bg-indigo-400 min-h-screen lg:h-screen flex">
-    <Login v-if="!user.name" @login="login($event)" />
+    <ui-transition animation="translate">
+    <Login v-if="!connected" @login="login($event)" />
     <Messenger v-else :socket="socket" @logout="logout" />
+    </ui-transition>
   </div>
 </template>
 
@@ -11,34 +13,31 @@ import "./assets/style.css";
 
 import Login from "./components/Login.vue";
 import Messenger from "./components/Messenger.vue";
+import UiTransition from './components/ui/UiTransition.vue';
 
 export default {
   components: {
     Login,
     Messenger,
+    UiTransition,
   },
-
+  data() {
+    return {
+      connected: false,
+    };
+  },
   computed: {
-    user() {
-      return this.$store.getters['client/user'];
-    },
     socket() {
       return io("http://localhost:8080", {
         autoConnect: false,
       });
     },
   },
-  mounted() {
-    this.socket.disconnect();
-    
-    if(this.user.name){
-      this.login(this.user);
-    }
-  },
   methods: {
     login(user) {
-      if (this.user && user) {
-        this.socket.connect();
+      this.connected = this.socket.connect();
+
+      if (this.connected) {
         this.socket.emit("register", user);
 
         this.$store.dispatch("client/addClient", user);
@@ -48,7 +47,8 @@ export default {
       this.socket.disconnect();
 
       this.$store.dispatch("client/removeClient").then(() => {
-        localStorage.removeItem('vuex')
+        localStorage.removeItem("vuex");
+        this.connected = false;
       });
     },
   },
