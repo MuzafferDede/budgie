@@ -11,7 +11,7 @@ export default {
             state.id = payload.id
             state.name = payload.name
         },
-        DELETE(state) {
+        REMOVE_CLIENT(state) {
             delete state.name
             delete state.id
         },
