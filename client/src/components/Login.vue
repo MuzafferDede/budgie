@@ -5,7 +5,7 @@
     <div class="grid gap-4 mx-auto lg:w-1/3">
       <div class="text-white flex items-center justify-center space-x-4">
         <ui-icon name="logo" size="4xl" />
-        <p class="text-3xl">Budgie</p>
+        <p class="text-5xl font-bold">Budgie</p>
       </div>
       <div class="w-full space-y-1">
         <label for="name" class="text-sm text-white">Your name</label>
@@ -24,20 +24,7 @@
         </ui-transition>
       </div>
       <div class="w-full flex justify-center">
-        <button
-          @click="login"
-          class="
-            w-full
-            bg-green-400
-            hover:bg-blue-700
-            p-3
-            text-white
-            rounded
-            text-2xl
-          "
-        >
-          Join
-        </button>
+        <ui-button @click="login" size="xl"> Join </ui-button>
       </div>
     </div>
   </div>
@@ -47,9 +34,10 @@
 import { v4 as userId } from "uuid";
 import UiTransition from "./ui/UiTransition.vue";
 import UiIcon from "./ui/UiIcon.vue";
+import UiButton from "./ui/UiButton.vue";
 
 export default {
-  components: { UiTransition, UiIcon },
+  components: { UiTransition, UiIcon, UiButton },
   data() {
     return {
       name: undefined,

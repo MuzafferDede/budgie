@@ -18,11 +18,27 @@
         <p>{{ contact.id }}</p>
       </div>
     </div>
+    <button
+      class="
+        p-3
+        w-full
+        shadow
+        rounded-full
+        bg-blue-400
+        hover:bg-blue-500
+        text-white
+        font-bold
+      "
+    >
+      Delete
+    </button>
   </div>
 </template>
 
 <script>
+import UiIcon from "./ui/UiIcon.vue";
 export default {
+  components: { UiIcon },
   computed: {
     contact() {
       return this.$store.getters["contacts/contact"];

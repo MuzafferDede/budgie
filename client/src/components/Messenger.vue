@@ -34,6 +34,7 @@
                 relative
                 shadow-md
               "
+              @click="togglePanel('notifications')"
             >
               <span
                 class="
@@ -62,7 +63,7 @@
           <div class="pl-4 border-l w-full">
             <button
               class="flex w-full space-x-2 items-center text-left group"
-              @click="showProfile = !showProfile"
+              @click="togglePanel('profile')"
             >
               <span
                 class="
@@ -76,7 +77,7 @@
                   shadow-md
                   flex-shrink-0
                 "
-                :class="{ 'bg-gray-500 text-white': showProfile }"
+                :class="{ 'bg-gray-500 text-white': showPanel }"
               >
                 <ui-icon name="user" />
               </span>
@@ -90,90 +91,144 @@
               <ui-icon
                 name="arrow-down"
                 class="ml-auto transform transition-all"
-                :class="{ 'rotate-180': showProfile }"
+                :class="{ 'rotate-90': showPanel }"
               />
             </button>
-            <div
-              v-if="showProfile"
-              class="
-                absolute
-                bg-white
-                shadow-lg
-                border
-                w-full
-                inset-x-0
-                top-full
-              "
-            >
-              <button class="w-full p-4 hover:bg-gray-100" @click="logout">
-                Logout
-              </button>
-            </div>
           </div>
         </div>
       </div>
-      <div class="flex flex-1 divide-x overflow-auto">
+      <div
+        class="flex flex-1 divide-x overflow-auto"
+        @click="showPanel = undefined"
+      >
         <keep-alive>
-          <contacts v-if="view === 'messenger'" />
+          <contacts v-if="view === 'messenger' && contact" />
         </keep-alive>
         <keep-alive>
           <conversation v-if="view === 'messenger'" />
         </keep-alive>
         <div
           v-if="view === 'contacts'"
-          class="flex flex-1 items-center justify-center"
+          class="flex flex-1 divide-x overflow-auto"
         >
-          <div class="max-w-lg w-full space-y-4">
-            <ui-transition animation="pull">
-              <p v-if="error" class="text-red-500">{{ error }}</p>
-            </ui-transition>
-            <input
-              type="text "
-              placeholder="Contact ID"
-              v-model="contactId"
-              class="
-                w-full
-                text-sm text-center
-                py-3
-                px-4
-                rounded-full
-                focus:outline-none
-                ring-1 ring-gray-200
-                focus:ring-blue-300 focus:ring-2
-              "
-            />
-            <div class="flex flex-col space-y-4">
-              <button
+          <div class="w-full max-w-sm">
+            <div class="w-full space-y-4 p-3">
+              <ui-transition animation="pull">
+                <p v-if="error" class="text-red-500">{{ error }}</p>
+              </ui-transition>
+              <input
+                type="text "
+                placeholder="Contact ID"
+                v-model="contactId"
                 class="
-                  p-3
                   w-full
-                  shadow
+                  text-sm text-center
+                  py-3
+                  px-4
                   rounded-full
-                  bg-green-400
-                  hover:bg-green-500
-                  text-white
-                  font-bold
+                  focus:outline-none
+                  ring-1 ring-gray-200
+                  focus:ring-blue-300 focus:ring-2
                 "
-                @click="request"
-              >
-                Request
-              </button>
+              />
+              <div class="flex flex-col space-y-4">
+                <ui-button @click="request">Request </ui-button>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 w-full divide-y">
+            <div
+              class="
+                p-4
+                flex
+                justify-between
+                items-center
+                group
+                hover:bg-gray-50
+              "
+              v-for="(request, index) in requests"
+              :key="index"
+            >
+              <div>
+                <p>{{ request.id }}</p>
+                <p class="text-xs">{{ $time(request.time) }}</p>
+                <p class="text-xs">{{ request.name }}</p>
+              </div>
+              <div class="flex space-x-2 items-center">
+                <ui-button @click="cancel(request)" size="sm">
+                  Delete
+                </ui-button>
+                <ui-button @click="accept(request)" size="sm">
+                  Delete
+                </ui-button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <div
+      class="right-0 top-full bg-white z-30 w-full max-w-sm shadow p-4"
+      v-if="showPanel"
+    >
+      <ui-transition animation="translate">
+        <div v-if="showPanel === 'profile'" class="w-full space-y-3">
+          <div class="relative">
+            <input
+              class="
+                w-full
+                p-3
+                focus:outline-none
+                bg-blue-200
+                rounded
+                shadow-inner
+                cursor-pointer
+              "
+              v-model="user.id"
+              readonly
+              @click="coppied = $copy($event)"
+            />
+            <ui-transition animation="pull">
+              <span
+                v-if="coppied"
+                class="
+                  bg-green-500
+                  text-white text-xs
+                  rounded-lg
+                  right-0
+                  top-0
+                  m-2
+                  opacity-90
+                  transform
+                  block
+                  absolute
+                  p-2
+                "
+                >Coppied</span
+              ></ui-transition
+            >
+          </div>
+          <ui-button @click="logout" color="red"> Logout </ui-button>
+        </div>
+      </ui-transition>
+
+      <ui-transition animation="translate">
+        <notifications v-if="showPanel === 'notifications'" />
+      </ui-transition>
+    </div>
   </div>
 </template>
 
 <script>
-import $socket from "../socket";
+import { $copy, $play, $socket, $time } from "../utils";
 import Texter from "./Texter.vue";
 import UiIcon from "./ui/UiIcon.vue";
 import Contacts from "./Contacts.vue";
 import UiButton from "./ui/UiButton.vue";
 import Conversation from "./Conversation.vue";
 import UiTransition from "./ui/UiTransition.vue";
+import Notifications from "./Notifications.vue";
 
 export default {
   components: {
@@ -183,27 +238,70 @@ export default {
     Texter,
     UiTransition,
     UiIcon,
+    Notifications,
   },
   data() {
     return {
-      showProfile: false,
+      showPanel: false,
       view: "messenger",
       contactId: undefined,
       error: undefined,
+      coppied: false,
     };
-  },
-  props: {
-    socket: {
-      type: Object,
-      default: undefined,
-    },
   },
   computed: {
     user() {
       return this.$store.getters["client/user"];
     },
+    contact() {
+      return this.$store.getters["contacts/contact"];
+    },
+    requests() {
+      return this.$store.getters["requests/all"];
+    },
+    notifications() {
+      return this.$store.getters["notifications/all"];
+    },
+  },
+  mounted() {
+    $socket.on("contact request", (contact) => {
+      this.$store.dispatch("requests/addRequest", contact);
+    });
+
+    $socket.on("request sent", (request) => {
+      this.$store.dispatch("requests/addRequest", request);
+    });
+
+    $socket.on("reject request", (request) => {
+      this.$store.dispatch("requests/removeRequest", request);
+    });
+
+    $socket.on("request canceled", (request) => {
+      this.$store.dispatch("requests/removeRequest", request);
+    });
+
+    $socket.on("request accepted", (contact) => {
+      this.$store.dispatch("contacts/addContact", contact);
+    });
+
+    $socket.on("new message", (data) => {
+      if (!this.contact || this.contact.id !== data.sender) {
+        data = { ...data, new: true };
+
+        $play("notify");
+      }
+
+      this.$store.dispatch("messages/addMessage", data);
+    });
+
+    $socket.on("contact left", (contact) => {
+      //this.$store.dispatch('contacts/setContactStatus', contact)
+    });
   },
   methods: {
+    $copy,
+    $play,
+    $time,
     logout() {
       this.$emit("logout");
     },
@@ -216,8 +314,31 @@ export default {
 
       $socket.emit("add contact", this.contactId);
 
-      this.$store.dispatch("requests/addRequest", this.contactId);
       this.contactId = undefined;
+    },
+    accept(request) {
+      $socket.emit("accept request", request.id);
+
+      this.$store.dispatch("contacts/addContact", request);
+    },
+    cancel(request) {
+      $socket.emit("cancel request", request.id);
+
+      this.$store.dispatch("requests/removeRequest", request);
+    },
+    togglePanel(view) {
+      this.coppied = false;
+
+      if (this.showPanel === view) {
+        this.showPanel = undefined;
+        return;
+      }
+
+      this.showPanel = true;
+
+      this.$nextTick(() => {
+        this.showPanel = view;
+      });
     },
   },
 };

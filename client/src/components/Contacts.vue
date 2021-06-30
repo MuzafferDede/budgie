@@ -1,5 +1,5 @@
 <template>
-  <div class="w-96 flex flex-col flex-shrink-0 divide-y">
+  <div class="max-w-sm w-full flex flex-col flex-shrink-0 divide-y">
     <div class="p-3 flex-none">
       <input
         type="text"
@@ -24,6 +24,7 @@
           class="divide-y hover:bg-gray-100 block"
           v-for="contact in contacts"
           :key="contact.id"
+          @click.prevent="setCurrentContact(contact)"
         >
           <div class="grid grid-cols-6 gap-2 py-4 px-3 items-center">
             <div class="relative col-span-1">
@@ -55,12 +56,21 @@
             </div>
             <div class="flex flex-col w-full relative col-span-5">
               <div class="flex justify-between items-center">
-                <strong class="font-bold truncate">{{ contact.name }}</strong>
-                <span class="flex-shrink-0 text-xs text-blue-400 font-bold">{{
-                  lastMessage(contact).time
-                }}</span>
+                <strong class="font-bold truncate">{{ contact.name }} </strong>
+                <span
+                  class="flex-shrink-0 text-xs text-blue-400 font-bold"
+                  v-if="lastMessage(contact)"
+                  >{{ $time(lastMessage(contact).time) }}</span
+                >
               </div>
-              <div class="w-full flex space-x-2 items-center">
+              <div
+                class="w-full flex space-x-2 items-center"
+                v-if="
+                  lastMessage(contact) &&
+                  lastMessage(contact).time &&
+                  !isTyping(contact)
+                "
+              >
                 <p class="truncate text-sm">
                   {{ lastMessage(contact).body }}
                 </p>
@@ -98,6 +108,11 @@
                   </span>
                 </div>
               </div>
+              <div v-else class="flex space-x-1 items-center animate-pulse">
+                <span v-if="isTyping(contact)" class="text-xs text-gray-500"
+                  >typing...</span
+                >
+              </div>
             </div>
           </div>
         </a>
@@ -107,15 +122,9 @@
 </template>
 
 <script>
+import { $time, $socket, $play } from "../utils";
 import UiTransition from "./ui/UiTransition.vue";
 import UiIcon from "./ui/UiIcon.vue";
-import $socket from "../socket";
-
-const sounds = {
-  notify: new Audio("notify.mp3"),
-  error: new Audio("error.mp3"),
-  typing: new Audio("typing.mp3"),
-};
 
 export default {
   components: { UiTransition, UiIcon },
@@ -126,24 +135,26 @@ export default {
       typingUsers: [],
     };
   },
-  props: {
-    typers: {
-      type: Array,
-      default: () => [],
-    },
-    socket: {
-      type: Object,
-      default: undefined,
-    },
+  mounted() {
+    $socket.on("typing", (data) => {
+      if (this.currentContact) {
+        $play("typing");
+      }
+      this.typingUsers.push(data.user.id);
+    });
+
+    $socket.on("stop typing", (data) => {
+      this.typingUsers = this.typingUsers.filter((id) => id !== data.user.id);
+    });
   },
   computed: {
     isTyping() {
-      return (id) => {
-        return this.typers.includes(id);
+      return (contact) => {
+        return this.typingUsers.includes(contact.id);
       };
     },
     messages() {
-      return this.$store.getters["messages/messages"].all;
+      return this.$store.getters["messages/all"];
     },
     notSeen() {
       return (id) => {
@@ -159,14 +170,13 @@ export default {
     contacts() {
       return this.$store.getters["contacts/all"];
     },
-    requests() {
-      return this.$store.getters["requests/requests"].all;
+    currentContact() {
+      return this.$store.getters["contacts/contact"];
     },
-    lastMessage() {
-      return (contact) =>
-        this.messages
-          .reverse()
-          .find((message) => message.sender.id === contact.id);
+    requests() {
+      return this.$store.getters["requests/all"].filter((request) => {
+        request.id !== this.user.id;
+      });
     },
     newMessages() {
       return (contact) => {
@@ -175,86 +185,22 @@ export default {
           .reduce((current, message) => {
             if (message.new) current++;
             return current;
-          }, 0);
+          }, 1);
       };
     },
   },
-  mounted() {
-    $socket.on("contact request", (contact) => {
-      this.$store.dispatch("requests/addRequest", contact);
-    });
-
-    $socket.on("request accepted", (contact) => {
-      this.$store.dispatch("contacts/addContact", contact);
-    });
-
-    $socket.on("new message", (data) => {
-      if (!this.contact || this.contact.id !== data.sender) {
-        data = { ...data, new: true };
-
-        this.play("notify");
-      }
-
-      this.$store.dispatch("messages/addMessage", data);
-    });
-
-    $socket.on("typing", (data) => {
-      if (this.contact && this.contact.id === data.user.id) {
-        this.play("typing");
-      }
-      this.typingUsers.push(data.user.id);
-    });
-
-    $socket.on("stop typing", (data) => {
-      this.typingUsers = this.typingUsers.filter((id) => id !== data.user.id);
-    });
-
-    $socket.on("contact left", (contact) => {
-      //this.$store.dispatch('contacts/setContactStatus', contact)
-    });
-  },
   methods: {
-    addContact() {
-      this.error = undefined;
-      if (
-        !this.contactId ||
-        this.contactId === this.$store.getters["client/user"].id
-      ) {
-        this.error = "We could not add this user";
-        return;
-      }
-
-      $socket.emit("add contact", this.contactId);
-
-      this.sent = true;
-      this.contactId = undefined;
-
-      //setTimeout(() => {
-      this.showAddContact = false;
-      this.sent = false;
-      //}, 500)
+    $time,
+    setCurrentContact(contact) {
+      this.$store.dispatch("contacts/setCurrentContact", contact);
     },
     removeContact(contact) {
       this.$store.dispatch("contacts/removeContact", contact);
-
-      this.$store.dispatch("contacts/setCurrentContact", undefined);
     },
-    accept(request) {
-      $socket.emit("accept request", request.id);
-
-      this.$store.dispatch("contacts/addContact", request);
-    },
-    reject(request) {
-      this.$store.dispatch("requests/removeRequest", request);
-    },
-    cancel() {
-      this.showAddContact = false;
-      this.contactId = undefined;
-      this.error = undefined;
-    },
-    play(type = "online") {
-      sounds[type].currentTime = 0;
-      sounds[type].play();
+    lastMessage(contact) {
+      return [...this.messages]
+        .reverse()
+        .find((message) => message.sender.id === contact.id);
     },
   },
 };

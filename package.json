@@ -1,5 +1,5 @@
 {
-  "name": "hm",
+  "name": "budgie",
   "version": "1.0.0",
   "scripts": {
     "dev": "yarn --cwd ./client run dev & yarn --cwd ./server run dev"

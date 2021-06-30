@@ -15,6 +15,7 @@
       "
       rows="1"
       placeholder="Type a message"
+      @keydown.enter.prevent="sendMessage"
     ></textarea>
     <button
       class="
@@ -26,6 +27,7 @@
         relative
         shadow-md
       "
+      @click="sendMessage"
     >
       <ui-icon name="send" size="lg" />
     </button>
@@ -33,7 +35,11 @@
 </template>
 
 <script>
+import { $socket } from "../utils";
+import UiIcon from "./ui/UiIcon.vue";
+
 export default {
+  components: { UiIcon },
   data() {
     return {
       message: undefined,
@@ -49,7 +55,7 @@ export default {
           time: new Date(),
         });
 
-        $socket.emit("new message", this.message, this.contact.id);
+        $socket.emit("new message", this.contact.id, this.message);
 
         this.message = undefined;
 

@@ -10,7 +10,6 @@ module.exports = {
     fontFamily: {
       roboto: ['Roboto', 'sans-serif']
     },
-    extend: {},
   },
   variants: {
     extend: {},

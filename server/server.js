@@ -11,7 +11,9 @@ const io = require("socket.io")(server, {
 const path = require("path");
 
 const PORT = process.env.PORT || 8080;
-
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(__dirname, "../client/public", "../index.html"));
+// })
 // REMOVE COMMENTS BELOW WHEN READY TO DEPLOY
 // app.use(express.static(path.join(__dirname, "client/build")));
 // app.get("/*", function (req, res) {
@@ -43,48 +45,52 @@ io.on('connection', (socket) => {
     socket.user = client
   });
 
-  socket.on('new message', (body, receiver) => {
-    const client = connectedClients.find(user => user.id === receiver);
+  socket.on('new message', (id, body) => {
 
-    if (client) {
+    prepare(id, client => {
       socket.to(client.socketId).emit('new message', {
         sender: socket.user.id,
-        receiver: receiver,
+        receiver: id,
         body: body,
         time: new Date()
       });
-    }
+    }, 'new message has issue')
   });
 
   socket.on('add contact', (id) => {
-    const client = connectedClients.find(user => user.id === id);
-    if (client) {
+    prepare(id, (client) => {
       io.to(client.socketId).emit('contact request', socket.user);
-    }
+
+      socket.emit('request sent', client);
+    }, 'add contact has issue')
   });
 
   socket.on('accept request', (id) => {
-    const client = connectedClients.find(user => user.id === id);
-
-    if (client) {
+    prepare(id, (client) => {
       io.to(client.socketId).emit('request accepted', socket.user)
-    }
+    }, 'accept request has issue')
+  });
+
+  socket.on('cancel request', (id) => {
+    prepare(id, (client) => {
+      io.to(client.socketId).emit('request canceled', socket.user)
+    }, 'cancel request has issue');
   });
 
   socket.on('typing', (id) => {
-    const client = connectedClients.find(user => user.id === id);
-
-    socket.to(client.socketId).emit('typing', {
-      user: socket.user
-    });
+    prepare(id, (client) => {
+      socket.to(client.socketId).emit('typing', {
+        user: socket.user
+      });
+    }, 'typing has issue')
   });
 
   socket.on('stop typing', (id) => {
-    const client = connectedClients.find(user => user.id === id);
-
-    socket.to(client.socketId).emit('stop typing', {
-      user: socket.user
-    });
+    prepare(id, (client) => {
+      socket.to(client.socketId).emit('stop typing', {
+        user: socket.user
+      })
+    }, 'stop typing has issue')
   });
 
   socket.on('disconnect', (reason) => {
@@ -93,6 +99,16 @@ io.on('connection', (socket) => {
     connectedClients = connectedClients.filter(client => client.clientId !== socket.client.id)
   });
 });
+
+function prepare(id, callback, error) {
+  const client = connectedClients.find(user => user.id === id);
+
+  if (client && client.socketId) {
+    return callback(client)
+  }
+
+  console.warn(error)
+}
 
 server.listen(PORT, () => console.log(`Listen on *: ${PORT}`));
 

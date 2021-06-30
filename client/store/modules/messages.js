@@ -1,25 +1,36 @@
 export default {
     namespaced: true,
-    state: () => { },
+    state: {
+        items: []
+    },
     getters: {
         all: state => {
-            return state
+            return state.items
+        },
+        current: (state) => (user, contact) => {
+            return state.items.filter(
+                message => {
+                    return (message.sender === contact &&
+                        message.receiver === user) ||
+                        (message.sender === user &&
+                            message.receiver === contact)
+                }
+
+            );
         }
     },
     mutations: {
         ADD_MESSAGE(state, payload) {
-            state.items = state.items || []
-
             state.items.push(payload)
         },
         REMOVE_CONTACT_MESSAGE(state, payload) {
-            state.items = (state.items || []).filter(message => message.sender === payload)
+            state.items = state.items.filter(message => message.sender === payload)
         },
         REMOVE_ALL_MESSAGES(state) {
             delete state.items
         },
         SET_MESSAGE_STATUS(state, payload) {
-            (state.items || []).map(message => {
+            state.items.map(message => {
                 if (message.sender === payload) {
                     delete message.new
                 }

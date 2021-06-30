@@ -20,7 +20,7 @@
 
 <script>
 import "./assets/style.css";
-import $socket from "./socket";
+import { $socket } from "./utils";
 
 import Login from "./components/Login.vue";
 import Messenger from "./components/Messenger.vue";

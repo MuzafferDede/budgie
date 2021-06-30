@@ -1,13 +1,17 @@
 <template>
-  <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
+  <div
+    class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4"
+    ref="scroll"
+  >
     <div
       v-for="(message, index) in messages"
+      ref="message"
       :key="index"
       class="p-3 flex relative group"
       :class="{
         'space-x-3 space-x-reverse flex-row-reverse':
-          message.sender.id === user.id,
-        'space-x-3': message.sender.id !== user.id,
+          message.sender === user.id,
+        'space-x-3': message.sender !== user.id,
       }"
     >
       <div
@@ -30,18 +34,19 @@
           :class="{
             'text-right': self(message),
           }"
-          >{{ message.sender.name }}</span
+          >{{ user.name }}</span
         >
         <p
-          :class="{ 'left-0': !self(message), 'right-0': self(message) }"
+          :class="{ 'left-0': self(message), 'right-0': !self(message) }"
           class="
             text-xs
             translate-y-3
             bg-gray-900 bg-opacity-80
             text-white
+            w-20
+            text-center
             rounded-full
-            px-4
-            py-2
+            p-2
             absolute
             bottom-full
             transition-all
@@ -51,7 +56,7 @@
             delay-150
           "
         >
-          {{ moment(message.time).format("LT") }}
+          {{ this.$time(message.time, "LT") }}
         </p>
         <p
           :class="{
@@ -68,16 +73,43 @@
 </template>
 
 <script>
+import { $time } from "../utils";
+import UiIcon from "./ui/UiIcon.vue";
+
 export default {
+  components: { UiIcon },
   computed: {
     self() {
-      return (message) => message.sender.id === this.user.id;
+      return (message) => message.sender === this.user.id;
     },
     user() {
       return this.$store.getters["client/user"];
     },
+    contact() {
+      return this.$store.getters["contacts/contact"];
+    },
     messages() {
-      return this.$store.getters["messages/messages"].all;
+      return this.$store.getters["messages/current"](
+        this.user.id,
+        this.contact.id
+      );
+    },
+  },
+  mounted() {
+    this.scrollToBottom();
+  },
+  watch: {
+    messages() {
+      this.scrollToBottom();
+    },
+  },
+  methods: {
+    $time,
+    scrollToBottom() {
+      this.$nextTick(() => {
+        // scroll to bottom of the messages
+        this.$refs.scroll.scrollTop = this.$refs.scroll.scrollHeight;
+      });
     },
   },
 };

@@ -1,9 +1,11 @@
 export default {
     namespaced: true,
-    state: () => { },
+    state: {
+        items: []
+    },
     getters: {
         all: state => {
-            return state
+            return state.items
         },
         contact: state => {
             return state.current
@@ -11,8 +13,7 @@ export default {
     },
     mutations: {
         ADD_CONTACT(state, payload) {
-
-            state.items = (state.items || []).filter(item => item.id !== payload.id)
+            state.items = state.items.filter(item => item.id !== payload.id)
 
             state.items.push(payload)
         },
@@ -23,17 +24,14 @@ export default {
             delete state.items
         },
         SET_CONTACT_STATUS(state, payload) {
-            const contact = (state.items || []).find(item => item.id === payload.id)
+            const contact = state.items.find(item => item.id === payload.id)
 
             if (!contact) {
                 contact.online = payload;
             }
         },
         SET_CURRENT_CONTACT(state, payload) {
-
-            const contact = (state.items || []).find(item => item.id === payload)
-
-            state.current = contact
+            state.current = payload
         },
     },
     actions: {
@@ -44,6 +42,8 @@ export default {
         },
         removeContact({ commit, dispatch }, data) {
             commit('REMOVE_CONTACT', data)
+
+            dispatch('messages/setCurrentContact', undefined)
 
             dispatch('messages/removeContactMessages', data, { root: true })
         },

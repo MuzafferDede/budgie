@@ -16,12 +16,12 @@ export default {
   props: {
     animation: {
       type: String,
-      default: 'fade',
+      default: "fade",
     },
     duration: {
       type: Object,
       default: () => {
-        return { in: 'duration-300', out: 'duration-75' };
+        return { in: "duration-300", out: "duration-75" };
       },
     },
   },
@@ -29,28 +29,28 @@ export default {
     transition() {
       return {
         fade: {
-          enterFrom: 'opacity-0',
-          enterTo: 'opacity-100',
-          leaveFrom: 'opacity-100',
-          leaveTo: 'opacity-0',
+          enterFrom: "opacity-0",
+          enterTo: "opacity-100",
+          leaveFrom: "opacity-100",
+          leaveTo: "opacity-0",
         },
         translate: {
-          enterFrom: 'transform opacity-0 -translate-y-4',
-          enterTo: 'transform opacity-100 translate-y-0',
-          leaveFrom: 'transform opacity-100 translate-y-0',
-          leaveTo: 'transform opacity-0 -translate-y-4',
+          enterFrom: "transform opacity-0 -translate-y-4",
+          enterTo: "transform opacity-100 translate-y-0",
+          leaveFrom: "transform opacity-100 translate-y-0",
+          leaveTo: "transform opacity-0 -translate-y-4",
         },
-        'translate-reverse': {
-          enterFrom: 'transform opacity-0 translate-y-4',
-          enterTo: 'transform opacity-100 -translate-y-0',
-          leaveFrom: 'transform opacity-100 -translate-y-0',
-          leaveTo: 'transform opacity-0 translate-y-4',
+        "translate-reverse": {
+          enterFrom: "transform opacity-0 translate-y-4",
+          enterTo: "transform opacity-100 -translate-y-0",
+          leaveFrom: "transform opacity-100 -translate-y-0",
+          leaveTo: "transform opacity-0 translate-y-4",
         },
         pull: {
-          enterFrom: 'transform opacity-0 translate-y-full',
-          enterTo: 'transform opacity-100 translate-y-0',
-          leaveFrom: 'transform opacity-100 translate-y-0',
-          leaveTo: 'transform opacity-0 translate-y-full',
+          enterFrom: "transform opacity-0 translate-y-full",
+          enterTo: "transform opacity-100 translate-y-0",
+          leaveFrom: "transform opacity-100 translate-y-0",
+          leaveTo: "transform opacity-0 translate-y-full",
         },
       };
     },
