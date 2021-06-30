@@ -4,7 +4,7 @@ export default {
     getters: {
         user: state => {
             return state
-        }
+        },
     },
     mutations: {
         ADD_CLIENT(state, payload) {

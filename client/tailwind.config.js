@@ -7,6 +7,9 @@ module.exports = {
       center: true,
       padding: '1rem',
     },
+    fontFamily: {
+      roboto: ['Roboto', 'sans-serif']
+    },
     extend: {},
   },
   variants: {

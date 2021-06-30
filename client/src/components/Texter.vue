@@ -1,32 +1,39 @@
 <template>
-  <div class="flex gap-4">
-    <input
-      type="text"
-      ref="message"
-      class="w-full p-4 rounded"
-      placeholder="Your message"
+  <div class="flex-none flex items-center space-x-3 p-3 bg-gray-200">
+    <textarea
       v-model="message"
-      @keyup.enter.prevent="sendMessage"
-    />
-    <ui-button
-      @click="sendMessage"
-      :disabled="!message"
-      :class="{ 'opacity-75 pointer-events-none': !message }"
-      >Send</ui-button
+      ref="message"
+      class="
+        w-full
+        resize-none
+        p-3
+        rounded-3xl
+        row-1
+        focus:outline-none
+        ring-1 ring-gray-200
+        focus:ring-blue-300 focus:ring-2
+      "
+      rows="1"
+      placeholder="Type a message"
+    ></textarea>
+    <button
+      class="
+        p-2
+        bg-white
+        hover:bg-blue-400
+        hover:text-white
+        rounded-full
+        relative
+        shadow-md
+      "
     >
+      <ui-icon name="send" size="lg" />
+    </button>
   </div>
 </template>
 
 <script>
-import UiButton from "./ui/UiButton.vue";
 export default {
-  components: { UiButton },
-  props: {
-    socket: {
-      type: Object,
-      default: undefined,
-    },
-  },
   data() {
     return {
       message: undefined,
@@ -42,7 +49,7 @@ export default {
           time: new Date(),
         });
 
-        this.socket.emit("new message", this.message, this.contact.id);
+        $socket.emit("new message", this.message, this.contact.id);
 
         this.message = undefined;
 
@@ -61,7 +68,7 @@ export default {
   watch: {
     message(value, oldValue) {
       if (Boolean(value) !== Boolean(oldValue)) {
-        this.socket.emit(
+        $socket.emit(
           Boolean(value) ? "typing" : "stop typing",
           this.contact.id
         );

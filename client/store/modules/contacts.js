@@ -2,7 +2,7 @@ export default {
     namespaced: true,
     state: () => { },
     getters: {
-        contacts: state => {
+        all: state => {
             return state
         },
         contact: state => {

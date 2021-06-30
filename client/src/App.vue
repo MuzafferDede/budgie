@@ -1,19 +1,30 @@
 <template>
-  <div class="bg-indigo-400 min-h-screen lg:h-screen flex">
+  <div
+    class="
+      min-h-screen
+      lg:h-screen
+      relative
+      antialiased
+      bg-gradient-to-t
+      to-blue-500
+      via-purple-400
+      from-pink-700
+    "
+  >
     <ui-transition animation="translate">
-    <Login v-if="!connected" @login="login($event)" />
-    <Messenger v-else :socket="socket" @logout="logout" />
+      <login v-if="!user.name" @login="login($event)" />
+      <messenger v-else @logout="logout" />
     </ui-transition>
   </div>
 </template>
 
 <script>
-import { io } from "socket.io-client";
 import "./assets/style.css";
+import $socket from "./socket";
 
 import Login from "./components/Login.vue";
 import Messenger from "./components/Messenger.vue";
-import UiTransition from './components/ui/UiTransition.vue';
+import UiTransition from "./components/ui/UiTransition.vue";
 
 export default {
   components: {
@@ -21,30 +32,37 @@ export default {
     Messenger,
     UiTransition,
   },
+  computed: {
+    user() {
+      return this.$store.getters["client/user"];
+    },
+  },
   data() {
     return {
       connected: false,
     };
   },
-  computed: {
-    socket() {
-      return io("http://localhost:8080", {
-        autoConnect: false,
-      });
-    },
+  mounted() {
+    if (this.user.name) {
+      this.login(this.user);
+    }
+
+    $socket.on("disconnect", () => {
+      console.log("you have been disconnected");
+    });
   },
   methods: {
     login(user) {
-      this.connected = this.socket.connect();
+      this.connected = $socket.connect();
 
       if (this.connected) {
-        this.socket.emit("register", user);
+        $socket.emit("register", user);
 
         this.$store.dispatch("client/addClient", user);
       }
     },
     logout() {
-      this.socket.disconnect();
+      $socket.disconnect();
 
       this.$store.dispatch("client/removeClient").then(() => {
         localStorage.removeItem("vuex");

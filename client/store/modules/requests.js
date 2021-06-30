@@ -2,7 +2,7 @@ export default {
     namespaced: true,
     state: () => { },
     getters: {
-        requests: state => {
+        all: state => {
             return state
         }
     },
