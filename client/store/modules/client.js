@@ -10,10 +10,12 @@ export default {
         ADD_CLIENT(state, payload) {
             state.id = payload.id
             state.name = payload.name
+            state.avatar = payload.avatar
         },
         REMOVE_CLIENT(state) {
             delete state.name
             delete state.id
+            delete state.avatar
         },
     },
     actions: {

@@ -3,8 +3,8 @@
     <div class="p-3 flex-none">
       <input
         type="text"
-        v-model="searchConversation"
-        placeholder="Search in conversations"
+        v-model="findContact"
+        placeholder="Search in contacts"
         class="
           w-full
           text-sm
@@ -21,10 +21,16 @@
       <div class="divide-y overflow-x-hidden overflow-y-auto">
         <a
           href="#"
-          class="divide-y hover:bg-gray-100 block"
+          class="block"
           v-for="contact in contacts"
           :key="contact.id"
           @click.prevent="setCurrentContact(contact)"
+          :class="{
+            'bg-blue-100 hover:bg-blue-100':
+              currentContact && contact.id === currentContact.id,
+            'hover:bg-gray-100':
+              currentContact && contact.id !== currentContact.id,
+          }"
         >
           <div class="grid grid-cols-6 gap-2 py-4 px-3 items-center">
             <div class="relative col-span-1">
@@ -33,9 +39,10 @@
                   h-12
                   w-12
                   flex
+                  rounded-full
                   items-center
                   justify-center
-                  shadow-lg
+                  shadow
                   relative
                 "
               >
@@ -45,36 +52,25 @@
                     inset-0
                     rounded-full
                     bg-gradient-to-t
-                    to-blue-500
-                    via-purple-400
-                    from-pink-700
-                    ring-4 ring-gray-200
+                    from-green-50
+                    via-green-300
+                    to-green-200
+                    ring-2 ring-gray-200
                     z-0
                   "
                   :class="{ 'animate-spin': isTyping(contact) }"
                 ></div>
-                <ui-icon name="user" class="text-gray-100 relative z-10" />
-                <span
-                  class="
-                    bg-green-400
-                    rounded-full
-                    p-1.5
-                    absolute
-                    bottom-0
-                    right-0
-                    border-2 border-white
-                  "
-                ></span>
+                <ui-icon name="avatar" size="lg" class="text-gray-900 z-10" />
               </div>
             </div>
             <div class="flex flex-col w-full relative col-span-5">
               <div class="flex justify-between items-center">
-                <strong class="font-bold truncate space-x-2 items-center"
+                <span class="truncate space-x-2 items-center text-gray-900"
                   ><span>{{ contact.name }}</span>
-                </strong>
+                </span>
 
                 <span
-                  class="flex-shrink-0 text-xs text-blue-400 font-bold"
+                  class="flex-shrink-0 text-xs"
                   v-if="lastMessage(contact)"
                   >{{ $time(lastMessage(contact).time) }}</span
                 >
@@ -86,7 +82,7 @@
                 <p class="truncate text-sm w-full">
                   {{ lastMessage(contact).body }}
                 </p>
-                <div class="flex-shrink-0 w-5 h-5 font-bold">
+                <div class="flex-shrink-0 w-5 h-5">
                   <span
                     v-if="newMessages(contact)"
                     class="
@@ -138,7 +134,7 @@ export default {
   data() {
     return {
       error: undefined,
-      searchConversation: undefined,
+      findContact: "",
       typingUsers: [],
     };
   },
@@ -178,15 +174,15 @@ export default {
       return this.$store.getters["client/user"];
     },
     contacts() {
-      return this.$store.getters["contacts/all"];
+      return this.$store.getters["contacts/all"].filter((contact) =>
+        contact.name.includes(this.findContact)
+      );
     },
     currentContact() {
       return this.$store.getters["contacts/contact"];
     },
     requests() {
-      return this.$store.getters["requests/all"].filter((request) => {
-        request.id !== this.user.id;
-      });
+      return this.$store.getters["requests/sent"];
     },
     newMessages() {
       return (contact) => this.$store.getters["messages/new"](contact);
@@ -201,11 +197,9 @@ export default {
     setCurrentContact(contact) {
       this.$store.dispatch(
         "contacts/setCurrentContact",
-        this.currentContact ? undefined : contact
+        this.currentContact === contact ? undefined : contact
       );
-    },
-    removeContact(contact) {
-      this.$store.dispatch("contacts/removeContact", contact);
+      this.findContact = "";
     },
   },
 };

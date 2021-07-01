@@ -6,38 +6,55 @@
         text-white
         p-4
         flex-shrink-0 flex flex-col
-        space-y-8
+        space-y-4
         items-center
       "
     >
-      <button @click="view = 'messenger'">
-        <ui-icon name="logo" size="xl" />
-      </button>
       <button
-        class="bg-gray-600 hover:bg-gray-700 p-2 rounded-full"
-        @click="view = 'contacts'"
+        @click="view = 'messenger'"
+        class="
+          p-2
+          bg-gradient-to-b
+          from-blue-50
+          via-blue-300
+          to-blue-200
+          rounded-full
+          text-gray-900
+          shadow
+        "
       >
-        <ui-icon name="contacts" />
+        <ui-icon name="avatar" />
       </button>
+      <div class="py-4 space-y-5 flex-col flex">
+        <button
+          class="bg-gray-600 hover:bg-gray-700 p-3 rounded-full"
+          @click="view = 'contacts'"
+        >
+          <ui-icon name="contacts" />
+        </button>
+      </div>
     </div>
     <div class="w-full flex flex-col overflow-hidden">
       <div class="border-b flex items-center justify-between flex-none">
-        <h1 class="font-bold text-2xl p-4">Budgie</h1>
+        <h1 class="text-2xl p-4 text-gray-900">Budgie</h1>
         <div class="w-80 flex space-x-4 relative p-4">
-          <div>
+          <div class="group">
             <button
               class="
                 p-2
-                hover:bg-gray-200
-                bg-gray-100
+                group-hover:bg-gray-500 group-hover:text-white
                 rounded-full
                 relative
                 shadow-md
+                border
               "
+              :class="{
+                'bg-gray-500 text-white': showPanel === 'notifications',
+              }"
               @click="togglePanel('notifications')"
             >
               <span
-              v-if=" requests.length"
+                v-if="receivedRequests.length"
                 class="
                   bg-red-500
                   w-5
@@ -53,10 +70,9 @@
                   flex
                   items-center
                   justify-center
-                  font-bold
                   shadow-md
                 "
-                >{{ requests.length }}</span
+                >{{ receivedRequests.length }}</span
               >
               <ui-icon name="notification" />
             </button>
@@ -76,21 +92,23 @@
                   justify-center
                   items-center
                   shadow-md
+                  border
                   flex-shrink-0
+                  ring-1 ring-gray-200
                 "
-                :class="{ 'bg-gray-500 text-white': showPanel }"
+                :class="{ 'bg-gray-500 text-white': showPanel === 'profile' }"
               >
-                <ui-icon name="user" />
+                <ui-icon name="avatar" />
               </span>
               <span class="flex flex-col w-full">
-                <span class="font-bold text-lg">{{ user.name }}</span>
-                <span class="font-bold text-xs flex items-center space-x-1">
+                <span class="text-lg text-gray-900">{{ user.name }}</span>
+                <span class="text-xs flex items-center space-x-1">
                   <span class="bg-green-400 rounded-full p-1.5"></span>
                   <span>Available</span>
                 </span>
               </span>
               <ui-icon
-                name="arrow-down"
+                name="arrow"
                 class="ml-auto transform transition-all"
                 :class="{ 'rotate-90': showPanel }"
               />
@@ -103,7 +121,7 @@
         @click="showPanel = undefined"
       >
         <keep-alive>
-          <contacts v-if="view === 'messenger'" />
+          <contacts v-if="view === 'messenger' && contacts.length" />
         </keep-alive>
         <keep-alive>
           <conversation v-if="view === 'messenger'" />
@@ -138,6 +156,12 @@
             </div>
           </div>
           <div class="p-3 w-full divide-y">
+            <p
+              class="italic h-full flex items-center justify-center"
+              v-if="!sentRequests.length"
+            >
+              There are no any requests.
+            </p>
             <div
               class="
                 p-4
@@ -147,7 +171,7 @@
                 group
                 hover:bg-gray-50
               "
-              v-for="(request, index) in requests"
+              v-for="(request, index) in sentRequests"
               :key="index"
             >
               <div>
@@ -156,12 +180,22 @@
                 <p class="text-xs">{{ request.name }}</p>
               </div>
               <div class="flex space-x-2 items-center">
-                <ui-button @click="cancel(request)" size="sm">
-                  Delete
+                <ui-button
+                  @click="cancelRequest(request)"
+                  size="sm"
+                  color="red"
+                >
+                  Cancel
                 </ui-button>
               </div>
             </div>
           </div>
+        </div>
+        <div
+          v-if="!contact && view === 'messenger'"
+          class="flex flex-1 items-center justify-center"
+        >
+          <p>Add your contacts to start a conversation</p>
         </div>
       </div>
     </div>
@@ -254,11 +288,14 @@ export default {
     contact() {
       return this.$store.getters["contacts/contact"];
     },
-        contacts() {
+    contacts() {
       return this.$store.getters["contacts/all"];
     },
-    requests() {
-      return this.$store.getters["requests/all"];
+    receivedRequests() {
+      return this.$store.getters["requests/received"];
+    },
+    sentRequests() {
+      return this.$store.getters["requests/sent"];
     },
     notifications() {
       return this.$store.getters["notifications/all"];
@@ -269,20 +306,10 @@ export default {
       this.$store.dispatch("requests/addRequest", contact);
     });
 
-    $socket.on("contact not found", () => {
-      this.error = 'Contact not found'
-    });
-
-    $socket.on("request sent", (request) => {
-      this.$store.dispatch("requests/addRequest", request);
-    });
-
-    $socket.on("reject request", (request) => {
+    $socket.on("contact not found", (request) => {
       this.$store.dispatch("requests/removeRequest", request);
-    });
 
-    $socket.on("request canceled", (request) => {
-      this.$store.dispatch("requests/removeRequest", request);
+      this.error = "Contact not found";
     });
 
     $socket.on("request accepted", (contact) => {
@@ -313,7 +340,7 @@ export default {
     request() {
       this.error = undefined;
 
-      if(this.contacts.find(contact => contact.id === this.contactId)) {
+      if (this.contacts.find((contact) => contact.id === this.contactId)) {
         this.error = "This contact already exists";
         return;
       }
@@ -324,7 +351,15 @@ export default {
 
       $socket.emit("add contact", this.contactId);
 
+      this.$store.dispatch("requests/addRequest", {
+        id: this.contactId,
+        name: "Pending",
+      });
+
       this.contactId = undefined;
+    },
+    cancelRequest(request) {
+      this.$store.dispatch("requests/removeRequest", request);
     },
     togglePanel(view) {
       this.coppied = false;

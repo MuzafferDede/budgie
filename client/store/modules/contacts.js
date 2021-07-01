@@ -43,7 +43,7 @@ export default {
         removeContact({ commit, dispatch }, data) {
             commit('REMOVE_CONTACT', data)
 
-            dispatch('messages/setCurrentContact', undefined)
+            dispatch('setCurrentContact', undefined)
 
             dispatch('messages/removeContactMessages', data, { root: true })
         },

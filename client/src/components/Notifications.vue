@@ -36,7 +36,7 @@ export default {
   components: { UiButton },
   computed: {
     requests() {
-      return this.$store.getters["requests/all"];
+      return this.$store.getters["requests/received"];
     },
   },
   methods: {
@@ -47,8 +47,6 @@ export default {
       this.$store.dispatch("contacts/addContact", request);
     },
     cancel(request) {
-      $socket.emit("cancel request", request.id);
-
       this.$store.dispatch("requests/removeRequest", request);
     },
   },

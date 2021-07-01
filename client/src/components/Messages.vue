@@ -9,28 +9,26 @@
       :key="index"
       class="p-3 flex relative group"
       :class="{
-        'space-x-3 space-x-reverse flex-row-reverse':
-          message.sender === user.id,
-        'space-x-3': message.sender !== user.id,
+        'space-x-3 space-x-reverse flex-row-reverse': self(message),
+        'space-x-3': !self(message),
       }"
     >
       <div
         class="
+          p-1
+          self-start
+          bg-white
+          ring-2 ring-gray-200
           rounded-full
-          h-12
-          w-12
-          flex-shrink-0 flex
-          items-center
-          justify-center
-          shadow-sm
-          bg-gray-200
+          text-gray-900
+          shadow
         "
       >
-        <ui-icon name="user" class="text-gray-400" />
+        <ui-icon name="avatar" size="sm" />
       </div>
       <div class="space-y-1 relative">
         <span
-          class="block text-xs text-gray-400"
+          class="block text-xs"
           :class="{
             'text-right': self(message),
           }"
@@ -42,8 +40,7 @@
             text-xs
             translate-y-4
             bg-gray-900 bg-opacity-80
-            text-white
-            text-center
+            text-white text-center
             whitespace-nowrap
             rounded-full
             py-2
@@ -61,8 +58,8 @@
         </p>
         <p
           :class="{
-            'rounded-tl-3xl bg-blue-500 text-white': self(message),
-            'rounded-tr-3xl bg-gray-200': !self(message),
+            'bg-blue-400 text-white rounded-tl-3xl ': self(message),
+            'border border-gray-200 bg-white rounded-tr-3xl ': !self(message),
           }"
           class="text-sm py-2 px-6 rounded-b-3xl shadow-inner max-w-lg"
         >

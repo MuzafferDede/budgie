@@ -1,32 +1,41 @@
 <template>
-  <compoment :is="currentIcon" :class="dimension" class="flex-shrink-0" />
+  <compoment class="flex-shrink-0" :is="currentIcon" :class="dimension" />
 </template>
 
 <script>
-import arrowDown from "../../assets/icons/svg/arrow-down.svg";
+import avatar from "../../assets/icons/svg/avatar.svg";
+import arrow from "../../assets/icons/svg/arrow.svg";
+import call from "../../assets/icons/svg/call.svg";
 import check from "../../assets/icons/svg/check.svg";
 import contacts from "../../assets/icons/svg/contacts.svg";
-import logo from "../../assets/icons/svg/logo.svg";
+import hang from "../../assets/icons/svg/hang.svg";
 import notification from "../../assets/icons/svg/notification.svg";
+import mic from "../../assets/icons/svg/mic.svg";
 import options from "../../assets/icons/svg/options.svg";
 import user from "../../assets/icons/svg/user.svg";
 import send from "../../assets/icons/svg/send.svg";
+import video from "../../assets/icons/svg/video.svg";
 
 const icons = {
+  avatar,
+  arrow,
+  call,
   check,
   contacts,
-  "arrow-down": arrowDown,
-  logo,
+  hang,
   notification,
+  mic,
   options,
   user,
   send,
+  video,
 };
+
 const dimensions = {
   none: "",
   xs: "w-3 h-3",
   sm: "w-4 h-4",
-  md: "w-6 h-6",
+  DEFAULT: "w-6 h-6",
   lg: "w-8 h-8 ",
   xl: "w-10 h-10",
   "2xl": "w-12 h-12",
@@ -42,7 +51,7 @@ export default {
     },
     size: {
       type: String,
-      default: "md",
+      default: "DEFAULT",
     },
   },
   computed: {

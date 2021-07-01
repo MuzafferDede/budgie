@@ -1,5 +1,5 @@
 <template>
-  <button class="rounded-full w-full font-bold" :class="[bg, padding]">
+  <button class="rounded-full w-full" :class="[bg, padding]">
     <slot />
   </button>
 </template>

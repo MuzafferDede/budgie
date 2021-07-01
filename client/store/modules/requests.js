@@ -4,8 +4,12 @@ export default {
         items: []
     },
     getters: {
-        all: state => {
-            return state.items
+        all: state => state.items,
+        sent: state => {
+            return state.items.filter(request => !request.socketId && !request.clientId)
+        },
+        received: state => {
+            return state.items.filter(request => request.socketId && request.clientId)
         }
     },
     mutations: {

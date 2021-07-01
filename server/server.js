@@ -60,10 +60,8 @@ io.on('connection', (socket) => {
   socket.on('add contact', (id) => {
     prepare(id, (client) => {
       io.to(client.socketId).emit('contact request', socket.user);
-
-      socket.emit('request sent', client);
     }, 'add contact has issue', () => {
-      socket.emit('contact not found');
+      socket.emit('contact not found', { id });
     })
   });
 
@@ -71,12 +69,6 @@ io.on('connection', (socket) => {
     prepare(id, (client) => {
       io.to(client.socketId).emit('request accepted', socket.user)
     }, 'accept request has issue')
-  });
-
-  socket.on('cancel request', (id) => {
-    prepare(id, (client) => {
-      io.to(client.socketId).emit('request canceled', socket.user)
-    }, 'cancel request has issue');
   });
 
   socket.on('typing', (id) => {
@@ -96,10 +88,34 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (reason) => {
-    socket.broadcast.emit('contact left', socket.user);
-
+    socket.broadcast.emit('handle leave', socket.user);
     connectedClients = connectedClients.filter(client => client.clientId !== socket.client.id)
   });
+
+  socket.on('calling', data => {
+    prepare(data.contact, (client) => {
+      socket.to(client.socketId).emit('handle calling', data)
+    }, 'calling issue')
+  })
+
+  socket.on('offer', data => {
+    prepare(data.contact, (client) => {
+      socket.to(client.socketId).emit('handle offer', data)
+    }, 'offer has issue')
+  })
+
+  socket.on('answer', data => {
+    prepare(data.contact, (client) => {
+      socket.to(client.socketId).emit('handle answer', data)
+    }, 'answer has issue')
+  })
+
+  socket.on('hang', data => {
+    prepare(data.contact, (client) => {
+      socket.to(client.socketId).emit('handle hang', data)
+    }, 'hang has issue')
+  })
+
 });
 
 function prepare(id, callback, error, emit) {
@@ -110,7 +126,7 @@ function prepare(id, callback, error, emit) {
   }
 
   console.warn(error)
-  if(emit) {
+  if (emit) {
     emit()
   }
 }

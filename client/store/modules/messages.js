@@ -44,7 +44,7 @@ export default {
         ADD_MESSAGE(state, payload) {
             state.items.push(payload)
         },
-        REMOVE_CONTACT_MESSAGE(state, payload) {
+        REMOVE_CONTACT_MESSAGES(state, payload) {
             state.items = state.items.filter(message => message.sender === payload)
         },
         REMOVE_ALL_MESSAGES(state) {
@@ -65,8 +65,8 @@ export default {
         addMessage({ commit }, data) {
             commit('ADD_MESSAGE', data)
         },
-        removeContactMessage({ commit }, data) {
-            commit('REMOVE_CONTACT_MESSAGE', data)
+        removeContactMessages({ commit }, data) {
+            commit('REMOVE_CONTACT_MESSAGES', data)
         },
         removeAllMessages({ commit }) {
             commit('REMOVE_ALL_MESSAGES')
