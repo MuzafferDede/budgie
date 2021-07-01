@@ -30,17 +30,30 @@
             <div class="relative col-span-1">
               <div
                 class="
-                  rounded-full
                   h-12
                   w-12
                   flex
                   items-center
                   justify-center
-                  shadow-sm
-                  bg-gray-200
+                  shadow-lg
+                  relative
                 "
               >
-                <ui-icon name="user" class="text-gray-400" />
+                <div
+                  class="
+                    absolute
+                    inset-0
+                    rounded-full
+                    bg-gradient-to-t
+                    to-blue-500
+                    via-purple-400
+                    from-pink-700
+                    ring-4 ring-gray-200
+                    z-0
+                  "
+                  :class="{ 'animate-spin': isTyping(contact) }"
+                ></div>
+                <ui-icon name="user" class="text-gray-100 relative z-10" />
                 <span
                   class="
                     bg-green-400
@@ -56,7 +69,10 @@
             </div>
             <div class="flex flex-col w-full relative col-span-5">
               <div class="flex justify-between items-center">
-                <strong class="font-bold truncate">{{ contact.name }} </strong>
+                <strong class="font-bold truncate space-x-2 items-center"
+                  ><span>{{ contact.name }}</span>
+                </strong>
+
                 <span
                   class="flex-shrink-0 text-xs text-blue-400 font-bold"
                   v-if="lastMessage(contact)"
@@ -65,13 +81,9 @@
               </div>
               <div
                 class="w-full flex space-x-2 items-center"
-                v-if="
-                  lastMessage(contact) &&
-                  lastMessage(contact).time &&
-                  !isTyping(contact)
-                "
+                v-if="lastMessage(contact) && lastMessage(contact).time"
               >
-                <p class="truncate text-sm">
+                <p class="truncate text-sm w-full">
                   {{ lastMessage(contact).body }}
                 </p>
                 <div class="flex-shrink-0 w-5 h-5 font-bold">
@@ -107,11 +119,6 @@
                     />
                   </span>
                 </div>
-              </div>
-              <div v-else class="flex space-x-1 items-center animate-pulse">
-                <span v-if="isTyping(contact)" class="text-xs text-gray-500"
-                  >typing...</span
-                >
               </div>
             </div>
           </div>
@@ -167,6 +174,9 @@ export default {
           }, 0);
       };
     },
+    user() {
+      return this.$store.getters["client/user"];
+    },
     contacts() {
       return this.$store.getters["contacts/all"];
     },
@@ -179,28 +189,23 @@ export default {
       });
     },
     newMessages() {
-      return (contact) => {
-        this.messages
-          .filter((message) => message.sender.id === contact.id)
-          .reduce((current, message) => {
-            if (message.new) current++;
-            return current;
-          }, 1);
-      };
+      return (contact) => this.$store.getters["messages/new"](contact);
+    },
+    lastMessage() {
+      return (contact) =>
+        this.$store.getters["messages/last"](this.user.id, contact.id);
     },
   },
   methods: {
     $time,
     setCurrentContact(contact) {
-      this.$store.dispatch("contacts/setCurrentContact", contact);
+      this.$store.dispatch(
+        "contacts/setCurrentContact",
+        this.currentContact ? undefined : contact
+      );
     },
     removeContact(contact) {
       this.$store.dispatch("contacts/removeContact", contact);
-    },
-    lastMessage(contact) {
-      return [...this.messages]
-        .reverse()
-        .find((message) => message.sender.id === contact.id);
     },
   },
 };

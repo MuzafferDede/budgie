@@ -17,6 +17,27 @@ export default {
                 }
 
             );
+        },
+        last: (state) => (user, contact) => {
+            const items = state.items.filter(
+                message => {
+                    return (message.sender === contact &&
+                        message.receiver === user) ||
+                        (message.sender === user &&
+                            message.receiver === contact)
+                }
+
+            );
+
+            return items[items.length - 1];
+        },
+        new: (state) => (contact) => {
+            return state.items
+                .filter((message) => message.sender === contact.id)
+                .reduce((current, message) => {
+                    if (message.new) current++;
+                    return current;
+                }, 0);
         }
     },
     mutations: {
@@ -30,11 +51,14 @@ export default {
             delete state.items
         },
         SET_MESSAGE_STATUS(state, payload) {
-            state.items.map(message => {
-                if (message.sender === payload) {
-                    delete message.new
-                }
-            })
+            if(payload) {
+                state.items.map(message => {
+                    if (message.sender === payload.id) {
+                        delete message.new
+                    }
+                })
+            }
+
         },
     },
     actions: {

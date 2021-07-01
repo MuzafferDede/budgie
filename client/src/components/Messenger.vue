@@ -37,6 +37,7 @@
               @click="togglePanel('notifications')"
             >
               <span
+              v-if=" requests.length"
                 class="
                   bg-red-500
                   w-5
@@ -55,7 +56,7 @@
                   font-bold
                   shadow-md
                 "
-                >1</span
+                >{{ requests.length }}</span
               >
               <ui-icon name="notification" />
             </button>
@@ -102,7 +103,7 @@
         @click="showPanel = undefined"
       >
         <keep-alive>
-          <contacts v-if="view === 'messenger' && contact" />
+          <contacts v-if="view === 'messenger'" />
         </keep-alive>
         <keep-alive>
           <conversation v-if="view === 'messenger'" />
@@ -156,9 +157,6 @@
               </div>
               <div class="flex space-x-2 items-center">
                 <ui-button @click="cancel(request)" size="sm">
-                  Delete
-                </ui-button>
-                <ui-button @click="accept(request)" size="sm">
                   Delete
                 </ui-button>
               </div>
@@ -256,6 +254,9 @@ export default {
     contact() {
       return this.$store.getters["contacts/contact"];
     },
+        contacts() {
+      return this.$store.getters["contacts/all"];
+    },
     requests() {
       return this.$store.getters["requests/all"];
     },
@@ -266,6 +267,10 @@ export default {
   mounted() {
     $socket.on("contact request", (contact) => {
       this.$store.dispatch("requests/addRequest", contact);
+    });
+
+    $socket.on("contact not found", () => {
+      this.error = 'Contact not found'
     });
 
     $socket.on("request sent", (request) => {
@@ -307,6 +312,11 @@ export default {
     },
     request() {
       this.error = undefined;
+
+      if(this.contacts.find(contact => contact.id === this.contactId)) {
+        this.error = "This contact already exists";
+        return;
+      }
       if (!this.contactId || this.contactId === this.user.id) {
         this.error = "There was an issue, please try again.";
         return;
@@ -315,16 +325,6 @@ export default {
       $socket.emit("add contact", this.contactId);
 
       this.contactId = undefined;
-    },
-    accept(request) {
-      $socket.emit("accept request", request.id);
-
-      this.$store.dispatch("contacts/addContact", request);
-    },
-    cancel(request) {
-      $socket.emit("cancel request", request.id);
-
-      this.$store.dispatch("requests/removeRequest", request);
     },
     togglePanel(view) {
       this.coppied = false;

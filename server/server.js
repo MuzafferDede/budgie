@@ -62,7 +62,9 @@ io.on('connection', (socket) => {
       io.to(client.socketId).emit('contact request', socket.user);
 
       socket.emit('request sent', client);
-    }, 'add contact has issue')
+    }, 'add contact has issue', () => {
+      socket.emit('contact not found');
+    })
   });
 
   socket.on('accept request', (id) => {
@@ -100,7 +102,7 @@ io.on('connection', (socket) => {
   });
 });
 
-function prepare(id, callback, error) {
+function prepare(id, callback, error, emit) {
   const client = connectedClients.find(user => user.id === id);
 
   if (client && client.socketId) {
@@ -108,6 +110,9 @@ function prepare(id, callback, error) {
   }
 
   console.warn(error)
+  if(emit) {
+    emit()
+  }
 }
 
 server.listen(PORT, () => console.log(`Listen on *: ${PORT}`));

@@ -34,19 +34,20 @@
           :class="{
             'text-right': self(message),
           }"
-          >{{ user.name }}</span
+          >{{ self(message) ? user.name : contact.name }}</span
         >
         <p
-          :class="{ 'left-0': self(message), 'right-0': !self(message) }"
+          :class="{ 'right-0': self(message), 'left-0': !self(message) }"
           class="
             text-xs
-            translate-y-3
+            translate-y-4
             bg-gray-900 bg-opacity-80
             text-white
-            w-20
             text-center
+            whitespace-nowrap
             rounded-full
-            p-2
+            py-2
+            px-4
             absolute
             bottom-full
             transition-all
@@ -56,7 +57,7 @@
             delay-150
           "
         >
-          {{ this.$time(message.time, "LT") }}
+          {{ $time(message.time) }}
         </p>
         <p
           :class="{
@@ -91,7 +92,7 @@ export default {
     messages() {
       return this.$store.getters["messages/current"](
         this.user.id,
-        this.contact.id
+        this.contact && this.contact.id
       );
     },
   },
@@ -99,8 +100,10 @@ export default {
     this.scrollToBottom();
   },
   watch: {
-    messages() {
-      this.scrollToBottom();
+    messages(value, oldValue) {
+      if (value.length > oldValue.length) {
+        this.scrollToBottom();
+      }
     },
   },
   methods: {

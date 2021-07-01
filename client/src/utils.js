@@ -11,12 +11,8 @@ export const $socket = io("http://localhost:8080", {
     autoConnect: false,
 });
 
-export function $time(time, format) {
-    if (!format) {
-        format = 'lll'
-    }
-
-    return time ? moment(time).format(format) : undefined;
+export function $time(time) {
+    return time ? moment(time).fromNow() : undefined;
 }
 
 export function $play(type) {
