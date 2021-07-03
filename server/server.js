@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', (reason) => {
-    socket.broadcast.emit('handle leave', socket.user);
+    socket.broadcast.emit('leave', socket.user);
     connectedClients = connectedClients.filter(client => client.clientId !== socket.client.id)
   });
 

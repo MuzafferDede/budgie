@@ -4,18 +4,7 @@
   >
     <div class="grid gap-8 mx-auto w-full lg:max-w-lg">
       <div class="flex items-center justify-center space-x-4">
-        <div
-          class="
-            p-3
-            bg-gradient-to-b
-            from-blue-50
-            via-blue-300
-            to-blue-200
-            rounded-full
-            text-gray-900
-            shadow
-          "
-        >
+        <div class="p-3 bg-white rounded-full text-gray-900 shadow-lg">
           <ui-icon name="avatar" size="xl" />
         </div>
         <p class="text-3xl text-white">Budgie</p>
@@ -47,7 +36,7 @@
         </div>
       </div>
       <div class="w-full flex justify-center">
-        <ui-button @click="login" size="lg"> Join </ui-button>
+        <ui-button @click="login"> Join </ui-button>
       </div>
     </div>
   </div>

@@ -12,16 +12,7 @@
     >
       <button
         @click="view = 'messenger'"
-        class="
-          p-2
-          bg-gradient-to-b
-          from-blue-50
-          via-blue-300
-          to-blue-200
-          rounded-full
-          text-gray-900
-          shadow
-        "
+        class="p-2 bg-white rounded-full text-gray-900 shadow"
       >
         <ui-icon name="avatar" />
       </button>
@@ -304,6 +295,7 @@ export default {
   mounted() {
     $socket.on("contact request", (contact) => {
       this.$store.dispatch("requests/addRequest", contact);
+      $play("notify");
     });
 
     $socket.on("contact not found", (request) => {

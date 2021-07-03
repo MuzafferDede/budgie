@@ -66,7 +66,10 @@ export default {
 
       this.$store.dispatch("client/removeClient").then(() => {
         localStorage.removeItem("vuex");
+
         this.connected = false;
+
+        window.location.reload();
       });
     },
   },
