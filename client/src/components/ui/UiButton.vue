@@ -13,9 +13,9 @@ const colors = {
 
 const sizes = {
   sm: "px-2 py-1 text-sm",
-  base: "px-3 py-3",
+  base: "px-3 py-3 text-lg",
   lg: "px-5 py-5 text-lg",
-  xl: "px-8 py-8 text-xl",
+  xl: "px-8 py-8 text-2xl",
 };
 
 export default {
