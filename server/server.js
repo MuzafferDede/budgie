@@ -92,28 +92,19 @@ io.on('connection', (socket) => {
     connectedClients = connectedClients.filter(client => client.clientId !== socket.client.id)
   });
 
-  socket.on('calling', data => {
-    prepare(data.contact, (client) => {
-      socket.to(client.socketId).emit('handle calling', data)
-    }, 'calling issue')
-  })
+  const events = [
+    "answer",
+    "candidate",
+    "hang",
+    "offer",
+  ]
 
-  socket.on('offer', data => {
-    prepare(data.contact, (client) => {
-      socket.to(client.socketId).emit('handle offer', data)
-    }, 'offer has issue')
-  })
-
-  socket.on('answer', data => {
-    prepare(data.contact, (client) => {
-      socket.to(client.socketId).emit('handle answer', data)
-    }, 'answer has issue')
-  })
-
-  socket.on('hang', data => {
-    prepare(data.contact, (client) => {
-      socket.to(client.socketId).emit('handle hang', data)
-    }, 'hang has issue')
+  events.forEach((event) => {
+    socket.on(event, payload => {
+      prepare(payload.contact, client => {
+        socket.to(client.socketId).emit(event, payload)
+      }, `${event} has issue`)
+    })
   })
 
 });

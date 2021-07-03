@@ -8,6 +8,8 @@ const audio = {
     typing: new Audio("typing.mp3"),
 };
 
+let currentAudio;
+
 export const $socket = io("http://localhost:8080", {
     autoConnect: false,
 });
@@ -17,16 +19,20 @@ export function $time(time) {
 }
 
 export function $play(type, loop = false, play = true) {
-    audio[type].currentTime = 0;
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    currentAudio = audio[type];
 
-    audio[type].loop = loop;
+    currentAudio.currentTime = 0;
+    currentAudio.loop = loop;
 
     if (!play) {
-        audio[type].pause();
         return
     }
 
-    audio[type].play();
+    currentAudio.play();
 }
 
 export function $copy(element) {

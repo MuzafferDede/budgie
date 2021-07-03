@@ -48,7 +48,7 @@ export default {
     }
 
     $socket.on("disconnect", () => {
-      console.log("you have been disconnected");
+      this.$log("you have been disconnected");
     });
   },
   methods: {
