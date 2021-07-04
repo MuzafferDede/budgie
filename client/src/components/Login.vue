@@ -26,13 +26,7 @@
             "
             placeholder="Enter your name here"
             @keyup.enter.prevent="login"
-            @input="error = ''"
           />
-          <ui-transition animation="translate">
-            <p v-if="!name && error" class="text-sm p-2 bg-white rounded">
-              {{ error }}
-            </p>
-          </ui-transition>
         </div>
       </div>
       <div class="w-full flex justify-center">
@@ -82,24 +76,10 @@
 </template>
 
 <script>
-import { v4 as userId } from "uuid";
 import UiTransition from "./ui/UiTransition.vue";
 import UiIcon from "./ui/UiIcon.vue";
 import UiButton from "./ui/UiButton.vue";
-
-const avatars = ["a", "b", "c", "d", "e", "f"];
-
-const colors = {
-  DEFAULT: "bg-transparent",
-  white: "bg-white",
-  gray: "bg-gray-400",
-  blue: "bg-blue-400",
-  purple: "bg-purple-400",
-  green: "bg-green-400",
-  yellow: "bg-yellow-400",
-  indigo: "bg-indigo-400",
-  pink: "bg-pink-400",
-};
+import { $uuid } from "../utils";
 
 export default {
   components: { UiTransition, UiIcon, UiButton },
@@ -117,13 +97,17 @@ export default {
   },
   methods: {
     login() {
-      this.name
-        ? this.$emit("login", {
-            id: userId(),
-            name: this.name,
-            avatar: this.avatar,
-          })
-        : (this.error = "Please enter your name");
+      if (this.name)
+        return this.$emit("login", {
+          id: $uuid(),
+          name: this.name,
+        });
+
+      this.$store.dispatch("app/setAlert", {
+        title: "Error",
+        body: "You must enter a name.",
+        color: "red",
+      });
     },
   },
 };

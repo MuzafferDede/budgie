@@ -48,17 +48,16 @@ export default {
             state.items = state.items.filter(message => message.sender === payload)
         },
         REMOVE_ALL_MESSAGES(state) {
-            delete state.items
+            state.items = []
         },
         SET_MESSAGE_STATUS(state, payload) {
-            if(payload) {
+            if (payload) {
                 state.items.map(message => {
                     if (message.sender === payload.id) {
                         delete message.new
                     }
                 })
             }
-
         },
     },
     actions: {

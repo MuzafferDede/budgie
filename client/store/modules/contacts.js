@@ -1,3 +1,5 @@
+import { $socket } from '../../src/utils'
+
 export default {
     namespaced: true,
     state: {
@@ -6,6 +8,9 @@ export default {
     getters: {
         all: state => {
             return state.items
+        },
+        confirmed: state => {
+            return state.items.filter(item => item.clientId && item.socketId)
         },
         contact: state => {
             return state.current
@@ -21,7 +26,7 @@ export default {
             state.items = state.items.filter(item => item.id !== payload.id)
         },
         REMOVE_ALL_CONTACTS(state) {
-            delete state.items
+            state.items = []
         },
         SET_CONTACT_STATUS(state, payload) {
             const contact = state.items.find(item => item.id === payload.id)
@@ -33,12 +38,17 @@ export default {
         SET_CURRENT_CONTACT(state, payload) {
             state.current = payload
         },
+        ACCEPT_CONTACT_REQUEST(state, payload) {
+            state.items = state.items.filter(item => item.id !== payload.id)
+
+            state.items.push(payload)
+
+            $socket.emit('accept request', payload.id)
+        },
     },
     actions: {
-        addContact({ commit, dispatch }, data) {
+        addContact({ commit }, data) {
             commit('ADD_CONTACT', data)
-
-            dispatch("requests/removeRequest", data, { root: true })
         },
         removeContact({ commit, dispatch }, data) {
             commit('REMOVE_CONTACT', data)
@@ -59,6 +69,11 @@ export default {
         },
         setContactStatus({ commit }, data) {
             commit('SET_CONTACT_STATUS', data)
+        },
+        acceptContactRequest({ commit, dispatch }, data) {
+            commit('ACCEPT_CONTACT_REQUEST', data)
+
+            dispatch('notifications/removeNotification', data, { root: true })
         },
     }
 }

@@ -54,6 +54,9 @@ import UiIcon from "./ui/UiIcon.vue";
 export default {
   components: { UiIcon },
   computed: {
+    contacts() {
+      return this.$store.getters["contacts/confirmed"];
+    },
     contact() {
       return this.$store.getters["contacts/contact"];
     },

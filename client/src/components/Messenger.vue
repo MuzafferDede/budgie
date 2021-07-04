@@ -1,30 +1,6 @@
 <template>
   <div class="h-screen overflow-hidden bg-white flex w-full">
-    <div
-      class="
-        bg-gray-800
-        text-white
-        p-4
-        flex-shrink-0 flex flex-col
-        space-y-4
-        items-center
-      "
-    >
-      <button
-        @click="view = 'messenger'"
-        class="p-2 bg-white rounded-full text-gray-900 shadow"
-      >
-        <ui-icon name="avatar" />
-      </button>
-      <div class="py-4 space-y-5 flex-col flex">
-        <button
-          class="bg-gray-600 hover:bg-gray-700 p-3 rounded-full"
-          @click="view = 'contacts'"
-        >
-          <ui-icon name="contacts" />
-        </button>
-      </div>
-    </div>
+    <side-panel />
     <div class="w-full flex flex-col overflow-hidden">
       <div class="border-b flex items-center justify-between flex-none">
         <h1 class="text-2xl p-4 text-gray-900">Budgie</h1>
@@ -40,12 +16,12 @@
                 border
               "
               :class="{
-                'bg-gray-500 text-white': showPanel === 'notifications',
+                'bg-gray-500 text-white': panel === 'Notifications',
               }"
-              @click="togglePanel('notifications')"
+              @click="$store.dispatch('app/setPanel', 'Notifications')"
             >
               <span
-                v-if="receivedRequests.length"
+                v-if="notifications.length"
                 class="
                   bg-red-500
                   w-5
@@ -63,7 +39,7 @@
                   justify-center
                   shadow-md
                 "
-                >{{ receivedRequests.length }}</span
+                >{{ notifications.length }}</span
               >
               <ui-icon name="notification" />
             </button>
@@ -71,23 +47,18 @@
           <div class="pl-4 border-l w-full">
             <button
               class="flex w-full space-x-2 items-center text-left group"
-              @click="togglePanel('profile')"
+              @click="$store.dispatch('app/setPanel', 'Profile')"
             >
               <span
                 class="
-                  w-10
-                  h-10
+                  p-2
                   group-hover:bg-gray-500 group-hover:text-white
                   rounded-full
-                  flex
-                  justify-center
-                  items-center
+                  relative
                   shadow-md
                   border
-                  flex-shrink-0
-                  ring-1 ring-gray-200
                 "
-                :class="{ 'bg-gray-500 text-white': showPanel === 'profile' }"
+                :class="{ 'bg-gray-500 text-white': panel === 'Profile' }"
               >
                 <ui-icon name="avatar" />
               </span>
@@ -101,7 +72,7 @@
               <ui-icon
                 name="arrow"
                 class="ml-auto transform transition-all"
-                :class="{ 'rotate-90': showPanel }"
+                :class="{ 'rotate-90': panel === 'Profile' }"
               />
             </button>
           </div>
@@ -109,167 +80,49 @@
       </div>
       <div
         class="flex flex-1 divide-x overflow-auto"
-        @click="showPanel = undefined"
+        @click="$store.dispatch('app/setPanel', undefined)"
       >
-        <keep-alive>
-          <contacts v-if="view === 'messenger' && contacts.length" />
-        </keep-alive>
-        <keep-alive>
-          <conversation v-if="view === 'messenger'" />
-        </keep-alive>
-        <div
-          v-if="view === 'contacts'"
-          class="flex flex-1 divide-x overflow-auto"
-        >
-          <div class="w-full max-w-sm">
-            <div class="w-full space-y-4 p-3">
-              <ui-transition animation="pull">
-                <p v-if="error" class="text-red-500">{{ error }}</p>
-              </ui-transition>
-              <input
-                type="text "
-                placeholder="Contact ID"
-                v-model="contactId"
-                class="
-                  w-full
-                  text-sm text-center
-                  py-3
-                  px-4
-                  rounded-full
-                  focus:outline-none
-                  ring-1 ring-gray-200
-                  focus:ring-blue-300 focus:ring-2
-                "
-              />
-              <div class="flex flex-col space-y-4">
-                <ui-button @click="request">Request </ui-button>
-              </div>
-            </div>
-          </div>
-          <div class="p-3 w-full divide-y">
-            <p
-              class="italic h-full flex items-center justify-center"
-              v-if="!sentRequests.length"
-            >
-              There are no any requests.
-            </p>
-            <div
-              class="
-                p-4
-                flex
-                justify-between
-                items-center
-                group
-                hover:bg-gray-50
-              "
-              v-for="(request, index) in sentRequests"
-              :key="index"
-            >
-              <div>
-                <p>{{ request.id }}</p>
-                <p class="text-xs">{{ $time(request.time) }}</p>
-                <p class="text-xs">{{ request.name }}</p>
-              </div>
-              <div class="flex space-x-2 items-center">
-                <ui-button
-                  @click="cancelRequest(request)"
-                  size="sm"
-                  color="red"
-                >
-                  Cancel
-                </ui-button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="!contact && view === 'messenger'"
-          class="flex flex-1 items-center justify-center"
-        >
-          <p>Add your contacts to start a conversation</p>
-        </div>
+        <conversation />
       </div>
     </div>
-
-    <div
-      class="right-0 top-full bg-white z-30 w-full max-w-sm shadow p-4"
-      v-if="showPanel"
-    >
-      <ui-transition animation="translate">
-        <div v-if="showPanel === 'profile'" class="w-full space-y-3">
-          <div class="relative">
-            <input
-              class="
-                w-full
-                p-3
-                focus:outline-none
-                bg-blue-200
-                rounded
-                shadow-inner
-                cursor-pointer
-              "
-              v-model="user.id"
-              readonly
-              @click="coppied = $copy($event)"
-            />
-            <ui-transition animation="pull">
-              <span
-                v-if="coppied"
-                class="
-                  bg-green-500
-                  text-white text-xs
-                  rounded-lg
-                  right-0
-                  top-0
-                  m-2
-                  opacity-90
-                  transform
-                  block
-                  absolute
-                  p-2
-                "
-                >Coppied</span
-              ></ui-transition
-            >
-          </div>
-          <ui-button @click="logout" color="red"> Logout </ui-button>
-        </div>
-      </ui-transition>
-
-      <ui-transition animation="translate">
-        <notifications v-if="showPanel === 'notifications'" />
-      </ui-transition>
-    </div>
+    <ui-transition animation="slide">
+      <div
+        class="space-y-4 relative bg-white z-30 w-full max-w-sm shadow p-4"
+        v-if="panel"
+      >
+        <ui-transition animation="pull">
+          <component :is="panelComponent"></component>
+        </ui-transition>
+      </div>
+    </ui-transition>
   </div>
 </template>
 
 <script>
-import { $copy, $play, $socket, $time } from "../utils";
-import Texter from "./Texter.vue";
+import { $play, $socket } from "../utils";
+import AddContact from "./AddContact.vue";
 import UiIcon from "./ui/UiIcon.vue";
-import Contacts from "./Contacts.vue";
-import UiButton from "./ui/UiButton.vue";
 import Conversation from "./Conversation.vue";
 import UiTransition from "./ui/UiTransition.vue";
 import Notifications from "./Notifications.vue";
+import Profile from "./Profile.vue";
+import SidePanel from "./SidePanel.vue";
+import Call from "./Call.vue";
 
 export default {
   components: {
-    UiButton,
-    Contacts,
+    AddContact,
     Conversation,
-    Texter,
     UiTransition,
     UiIcon,
     Notifications,
+    Profile,
+    SidePanel,
+    Call,
   },
   data() {
     return {
-      showPanel: false,
-      view: "messenger",
       contactId: undefined,
-      error: undefined,
-      coppied: false,
     };
   },
   computed: {
@@ -280,32 +133,81 @@ export default {
       return this.$store.getters["contacts/contact"];
     },
     contacts() {
-      return this.$store.getters["contacts/all"];
-    },
-    receivedRequests() {
-      return this.$store.getters["requests/received"];
-    },
-    sentRequests() {
-      return this.$store.getters["requests/sent"];
+      return this.$store.getters["contacts/confirmed"];
     },
     notifications() {
-      return this.$store.getters["notifications/all"];
+      return this.$store.getters["notifications/unseen"];
+    },
+    panel() {
+      return this.$store.getters["app/panel"];
+    },
+    panelComponent() {
+      return this.$options.components[this.panel];
     },
   },
   mounted() {
-    $socket.on("contact request", (contact) => {
-      this.$store.dispatch("requests/addRequest", contact);
-      $play("notify");
+    $socket.on("contact request", (payload) => {
+      const isContactExists = this.contacts.find(
+        (contact) => contact.id === payload.id && contact.socketId
+      );
+
+      if (!isContactExists) {
+        this.$store
+          .dispatch("notifications/addNotification", {
+            title: "Contact Request",
+            body: `${payload.id} sent you a contact request.`,
+            time: new Date(),
+            actions: [
+              {
+                label: "Delete",
+                dispatch: "notifications/removeNotification",
+                data: payload,
+              },
+              {
+                label: "Accept",
+                dispatch: "contacts/acceptContactRequest",
+                data: payload,
+              },
+            ],
+          })
+          .then(() => {
+            $play("notify");
+            this.$store.dispatch("app/setAlert", {
+              title: "Contact Request",
+              body: `You have new contact request from ${payload.id}.`,
+              color: "blue",
+            });
+          });
+      }
     });
 
     $socket.on("contact not found", (request) => {
-      this.$store.dispatch("requests/removeRequest", request);
-
-      this.error = "Contact not found";
+      this.$store.dispatch("contacts/removeContact", request).then(() => {
+        this.$store.dispatch("app/setAlert", {
+          title: "Error",
+          body: "Contact not found.",
+          color: "red",
+        });
+      });
     });
 
-    $socket.on("request accepted", (contact) => {
-      this.$store.dispatch("contacts/addContact", contact);
+    $socket.on("request accepted", (payload) => {
+      this.$store.dispatch("contacts/addContact", payload).then(() => {
+        this.$store
+          .dispatch("notifications/addNotification", {
+            title: "Request Accepted",
+            body: `${payload.name} accepted your contact request.`,
+            time: new Date(),
+          })
+          .then(() => {
+            $play("notify");
+            this.$store.dispatch("app/setAlert", {
+              title: "Contact Request",
+              body: `${payload.name} accepted your contact request.`,
+              color: "green",
+            });
+          });
+      });
     });
 
     $socket.on("new message", (data) => {
@@ -323,50 +225,7 @@ export default {
     });
   },
   methods: {
-    $copy,
     $play,
-    $time,
-    logout() {
-      this.$emit("logout");
-    },
-    request() {
-      this.error = undefined;
-
-      if (this.contacts.find((contact) => contact.id === this.contactId)) {
-        this.error = "This contact already exists";
-        return;
-      }
-      if (!this.contactId || this.contactId === this.user.id) {
-        this.error = "There was an issue, please try again.";
-        return;
-      }
-
-      $socket.emit("add contact", this.contactId);
-
-      this.$store.dispatch("requests/addRequest", {
-        id: this.contactId,
-        name: "Pending",
-      });
-
-      this.contactId = undefined;
-    },
-    cancelRequest(request) {
-      this.$store.dispatch("requests/removeRequest", request);
-    },
-    togglePanel(view) {
-      this.coppied = false;
-
-      if (this.showPanel === view) {
-        this.showPanel = undefined;
-        return;
-      }
-
-      this.showPanel = true;
-
-      this.$nextTick(() => {
-        this.showPanel = view;
-      });
-    },
   },
 };
 </script>

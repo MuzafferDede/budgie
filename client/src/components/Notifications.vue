@@ -1,54 +1,42 @@
 <template>
   <div class="space-y-4">
-    <h2 class="text-2xl">Notifications</h2>
-    <div
-      class="
-        p-4
-        flex flex-col
-        space-y-4
-        justify-between
-        items-center
-        group
-        hover:bg-gray-50
-      "
-      v-for="(request, index) in requests"
-      :key="index"
-    >
-      <div>
-        <p>{{ request.id }}</p>
-        <p class="text-xs">{{ $time(request.time) }}</p>
-        <p class="text-xs">{{ request.name }}</p>
-      </div>
-      <div class="flex space-x-2 items-center w-full">
-        <ui-button @click="cancel(request)" size="sm" color="red">
-          Delete
-        </ui-button>
-        <ui-button @click="accept(request)" size="sm"> Accept </ui-button>
-      </div>
+    <div class="flex items-end space-x-2 justify-between">
+      <h2 class="text-xl font-bold py-2">Notifications</h2>
+      <button
+        class="p-2 text-blue-400"
+        @click="$store.dispatch('notifications/removeAllNotifications')"
+      >
+        Clear all
+      </button>
     </div>
+    <div class="space-y-2">
+      <notification
+        :info="notification"
+        v-for="(notification, index) in notifications"
+        :key="index"
+      />
+    </div>
+    <p
+      class="italic h-full flex items-center justify-center"
+      v-if="!notifications.length"
+    >
+      There are no any notifications.
+    </p>
   </div>
 </template>
 
 <script>
-import UiButton from "./ui/UiButton.vue";
-import { $time, $socket } from "../utils";
+import Notification from "./Notification.vue";
+
 export default {
-  components: { UiButton },
+  components: { Notification },
   computed: {
-    requests() {
-      return this.$store.getters["requests/received"];
+    notifications() {
+      return this.$store.getters["notifications/all"];
     },
   },
-  methods: {
-    $time,
-    accept(request) {
-      $socket.emit("accept request", request.id);
-
-      this.$store.dispatch("contacts/addContact", request);
-    },
-    cancel(request) {
-      this.$store.dispatch("requests/removeRequest", request);
-    },
+  mounted() {
+    this.$store.dispatch("notifications/readAllNotifications");
   },
 };
 </script>

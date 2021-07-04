@@ -89,11 +89,10 @@ export default {
   components: { UiButton, UiIcon },
   data() {
     return {
+      RTC: undefined,
       calling: false,
-      pc: undefined,
-      playing: undefined,
       connected: false,
-      dataBag: undefined,
+      offer: undefined,
     };
   },
   computed: {
@@ -107,25 +106,25 @@ export default {
 
       this.calling = this.contact.id;
 
-      this.dataBag = payload;
+      this.offer = payload.offer;
     });
 
     $socket.on("candidate", (payload) => {
-      if (this.pc) {
-        this.pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+      if (this.RTC) {
+        this.RTC.addIceCandidate(new RTCIceCandidate(payload.candidate));
       }
     });
 
     $socket.on("answer", (payload) => {
-      this.pc
-        .setRemoteDescription(new RTCSessionDescription(payload.answer))
-        .then(() => {
-          $play("ringtone", false, false);
+      this.RTC.setRemoteDescription(
+        new RTCSessionDescription(payload.answer)
+      ).then(() => {
+        $play("ringtone", false, false);
 
-          this.connected = true;
+        this.connected = true;
 
-          this.calling = true;
-        });
+        this.calling = true;
+      });
     });
 
     $socket.on("hang", () => {
@@ -140,33 +139,31 @@ export default {
     audioCall() {},
     answer() {
       this.prepare().then(() => {
-        this.pc
-          .setRemoteDescription(new RTCSessionDescription(this.dataBag.offer))
-          .then(() => {
-            this.pc
-              .createAnswer()
-              .then((answer) => {
-                this.pc.setLocalDescription(answer);
+        this.RTC.setRemoteDescription(
+          new RTCSessionDescription(this.offer)
+        ).then(() => {
+          this.RTC.createAnswer()
+            .then((answer) => {
+              this.RTC.setLocalDescription(answer);
 
-                this.send("answer", { answer });
+              this.send("answer", { answer });
 
-                this.connected = true;
+              this.connected = true;
 
-                $play("ringtone", false, false);
-              })
-              .catch((error) => {
-                this.$log(error);
-              });
-          });
+              $play("ringtone", false, false);
+            })
+            .catch((error) => {
+              this.$log(error);
+            });
+        });
       });
     },
     createPeerOffer() {
-      this.pc
-        .createOffer()
+      this.RTC.createOffer()
         .then((offer) => {
           this.send("offer", { offer });
 
-          this.pc.setLocalDescription(offer).then(() => {
+          this.RTC.setLocalDescription(offer).then(() => {
             $play("ringtone", true);
           });
         })
@@ -177,12 +174,13 @@ export default {
     handleHang() {
       if (this.connected) {
         this.$refs.partner.srcObject = undefined;
+
         this.$refs.self.srcObject = undefined;
 
-        this.pc.close();
+        this.RTC.close();
       }
 
-      this.pc = undefined;
+      this.RTC = undefined;
 
       $play("ringtone", false, false);
 
@@ -201,18 +199,18 @@ export default {
         .then((stream) => {
           this.$refs.self.srcObject = stream;
 
-          this.pc = new RTCPeerConnection(config);
+          this.RTC = new RTCPeerConnection(config);
 
           stream
             .getTracks()
-            .forEach((track) => this.pc.addTrack(track, stream));
+            .forEach((track) => this.RTC.addTrack(track, stream));
 
-          this.pc.ontrack = (event) => {
+          this.RTC.ontrack = (event) => {
             // Don't set srcObject again if it is already set.
             if (this.$refs.partner.srcObject) return;
             this.$refs.partner.srcObject = event.streams[0];
           };
-          this.pc.onicecandidate = (event) => {
+          this.RTC.onicecandidate = (event) => {
             if (event.candidate) {
               this.send("candidate", {
                 candidate: event.candidate,

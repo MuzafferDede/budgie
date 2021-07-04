@@ -1,5 +1,6 @@
 import moment from "moment";
 import { io } from "socket.io-client";
+import { v4 as uuid } from "uuid";
 
 const audio = {
     notify: new Audio("notify.mp3"),
@@ -19,6 +20,7 @@ export function $time(time) {
 }
 
 export function $play(type, loop = false, play = true) {
+
     if (currentAudio) {
         currentAudio.pause();
         currentAudio.currentTime = 0;
@@ -29,7 +31,7 @@ export function $play(type, loop = false, play = true) {
     currentAudio.loop = loop;
 
     if (!play) {
-        return
+        return;
     }
 
     currentAudio.play();
@@ -43,6 +45,10 @@ export function $copy(element) {
 }
 
 export function $alert(message) {
-    alert(message)
+    alert(message);
+}
+
+export function $uuid() {
+    return uuid();
 }
 

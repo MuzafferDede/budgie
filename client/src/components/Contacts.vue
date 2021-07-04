@@ -133,7 +133,6 @@ export default {
   components: { UiTransition, UiIcon },
   data() {
     return {
-      error: undefined,
       findContact: "",
       typingUsers: [],
     };
@@ -174,8 +173,10 @@ export default {
       return this.$store.getters["client/user"];
     },
     contacts() {
-      return this.$store.getters["contacts/all"].filter((contact) =>
-        contact.name.includes(this.findContact)
+      return this.$store.getters["contacts/confirmed"].filter(
+        (contact) =>
+          contact.name.toLowerCase().indexOf(this.findContact.toLowerCase()) !==
+          -1
       );
     },
     currentContact() {
