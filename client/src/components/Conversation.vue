@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full divide-x">
     <contacts v-if="contacts.length" />
-    <ui-transition animation="fade">
+    <ui-transition animation="scale">
       <div
         class="w-full flex-1 flex flex-col bg-gray-50 min-w-min divide-y"
         v-if="contact"
@@ -9,13 +9,42 @@
         <div class="p-3.5 bg-white flex items-center justify-between">
           <h2 class="text-2xl text-gray-900">{{ contact.name }}</h2>
           <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2" v-if="panel !== 'Call'">
+              <button
+                class="
+                  p-2
+                  hover:bg-gray-100
+                  rounded-full
+                  relative
+                  shadow-md
+                  transition-all
+                  duration-150
+                "
+                @click="$store.dispatch('app/setAudioCall')"
+              >
+                <ui-icon name="call" />
+              </button>
+              <button
+                class="
+                  p-2
+                  hover:bg-gray-100
+                  rounded-full
+                  relative
+                  shadow-md
+                  transition-all
+                  duration-150
+                "
+                @click="$store.dispatch('app/setVideoCall')"
+              >
+                <ui-icon name="video" />
+              </button>
+            </div>
             <button
               class="
                 p-2
                 hover:bg-gray-100
                 rounded-full
                 relative
-                shadow-md
                 transition-all
                 duration-150
               "
@@ -65,6 +94,9 @@ export default {
     },
     contact() {
       return this.$store.getters["contacts/contact"];
+    },
+    panel() {
+      return this.$store.getters["app/panel"];
     },
   },
 };

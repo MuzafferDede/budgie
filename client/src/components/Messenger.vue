@@ -78,10 +78,7 @@
           </div>
         </div>
       </div>
-      <div
-        class="flex flex-1 divide-x overflow-auto"
-        @click="$store.dispatch('app/setPanel', undefined)"
-      >
+      <div class="flex flex-1 divide-x overflow-auto">
         <conversation />
       </div>
     </div>
@@ -146,6 +143,19 @@ export default {
     },
   },
   mounted() {
+    this.$store.dispatch("app/setPanel", undefined);
+
+    $socket.on("offer", (payload) => {
+      $play("ringtone", true);
+      this.$store
+        .dispatch("contacts/setCurrentContact", payload.contact)
+        .then(() => {
+          this.$store.dispatch("app/setPanel", "Call").then(() => {
+            this.$store.dispatch("app/setOffer", payload);
+          });
+        });
+    });
+
     $socket.on("contact request", (payload) => {
       const isContactExists = this.contacts.find(
         (contact) => contact.id === payload.id && contact.socketId
@@ -223,6 +233,14 @@ export default {
     $socket.on("contact left", (contact) => {
       //this.$store.dispatch('contacts/setContactStatus', contact)
     });
+  },
+  beforeUnmount() {
+    $socket.removeAllListeners("offer");
+    $socket.removeAllListeners("contact request");
+    $socket.removeAllListeners("contact not found");
+    $socket.removeAllListeners("request accepted");
+    $socket.removeAllListeners("new message");
+    $socket.removeAllListeners("contact left");
   },
   methods: {
     $play,

@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
   events.forEach((event) => {
     socket.on(event, payload => {
       prepare(payload.contact, client => {
-        socket.to(client.socketId).emit(event, payload)
+        socket.to(client.socketId).emit(event, { ...payload, contact: socket.user })
       }, `${event} has issue`)
     })
   })

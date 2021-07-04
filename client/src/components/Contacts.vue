@@ -137,6 +137,10 @@ export default {
       typingUsers: [],
     };
   },
+  beforeUnmount() {
+    $socket.removeAllListeners("typing");
+    $socket.removeAllListeners("stop typing");
+  },
   mounted() {
     $socket.on("typing", (data) => {
       if (this.currentContact) {

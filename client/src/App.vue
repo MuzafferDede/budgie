@@ -58,6 +58,9 @@ export default {
       this.$log("you have been disconnected");
     });
   },
+  beforeUnmount() {
+    $socket.removeAllListeners("disconnect");
+  },
   watch: {
     event(event) {
       if (this[event.name]) {

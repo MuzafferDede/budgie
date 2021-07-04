@@ -6,6 +6,7 @@
 
 <script>
 const colors = {
+  none: "",
   green: "bg-green-400 hover:bg-green-500 text-white",
   blue: "bg-blue-400 hover:bg-blue-500 text-white",
   red: "bg-red-400 hover:bg-red-500 text-white",

@@ -1,68 +1,103 @@
 <template>
-  <div class="bg-gray-700 p-4">
-    <div class="container space-y-4" v-if="calling">
-      <div class="flex flex-col lg:flex-row w-full lg:max-h-96">
-        <!-- VIDEO -->
-        <div class="p-2 w-full" v-show="connected">
-          <video
-            class="w-full h-full object-cover rounded-lg"
-            ref="partner"
-            @loadedmetadata="$event.target.play()"
-          />
-        </div>
-        <div class="p-2 w-full">
-          <video
-            muted
-            class="w-full h-full object-cover rounded-lg"
-            ref="self"
-            @loadedmetadata="$event.target.play()"
-          />
-        </div>
-        <div v-if="calling" class="space-y-4 w-full p-8 self-center">
-          <div class="flex justify-center items-center">
-            <div
-              class="
-                p-4
-                rounded-full
-                bg-white
-                text-gray-900
-                shadow-lg
-                ring-2 ring-gray-200
-              "
-              :class="{ 'animate-bounce': !connected }"
-            >
-              <ui-icon name="avatar" size="3xl" />
-            </div>
-          </div>
-          <span class="flex flex-col items-center text-white">
-            <span class="text-lg">{{ contact.name }}</span>
-            <span v-if="!connected" class="text-sm">Video calling...</span>
-          </span>
-          <div class="flex justify-center space-x-4" v-if="calling">
-            <div class="w-auto" v-if="calling === contact.id && !connected">
-              <ui-button @click="answer" class="animate-pulse">
-                <ui-icon name="call" />
-              </ui-button>
-            </div>
-            <div class="w-auto">
-              <ui-button @click="hang" color="red">
-                <ui-icon name="call" class="transform rotate-180" />
-              </ui-button>
-            </div>
-          </div>
-        </div>
+  <div class="bg-gray-700 p-4 h-full rounded-lg space-y-4 overflow-auto">
+    <div class="flex flex-col w-full" v-show="connected">
+      <div class="p-2 w-full" v-show="connected">
+        <video
+          class="w-full h-full object-cover rounded-lg"
+          ref="partner"
+          @loadedmetadata="$event.target.play()"
+        />
+      </div>
+      <div class="p-2 w-full">
+        <video
+          muted
+          class="w-full h-full object-cover rounded-lg"
+          ref="self"
+          @loadedmetadata="$event.target.play()"
+        />
       </div>
     </div>
-    <div v-else class="flex justify-end space-x-4">
-      <div class="w-auto">
-        <ui-button @click="videoCall">
-          <ui-icon name="video" />
-        </ui-button>
+    <div class="space-y-4 w-full p-8 self-center">
+      <div class="flex justify-center items-center">
+        <div
+          class="
+            p-4
+            rounded-full
+            bg-white
+            text-gray-900
+            shadow-lg
+            ring-2 ring-gray-200
+          "
+          :class="{ 'animate-bounce': !connected }"
+        >
+          <ui-icon name="avatar" size="3xl" />
+        </div>
       </div>
-      <div class="w-auto">
-        <ui-button @click="hang" color="blue">
-          <ui-icon name="call" />
-        </ui-button>
+      <span class="flex flex-col items-center text-white">
+        <span class="text-lg">{{ contact.name }}</span>
+        <span v-if="!connected" class="text-sm">Video calling...</span>
+      </span>
+      <div class="flex justify-center space-x-4">
+        <div class="w-auto" v-if="caller && !connected">
+          <ui-button @click="answer" class="animate-pulse">
+            <ui-icon name="call" />
+          </ui-button>
+        </div>
+        <div class="w-auto">
+          <ui-button @click="hang" color="red">
+            <ui-icon name="call" class="transform rotate-180" />
+          </ui-button>
+        </div>
+      </div>
+      <div class="flex justify-center space-x-4 text-white" v-if="connected">
+        <div class="w-auto">
+          <ui-button
+            class="relative"
+            @click="toggleSound('partner')"
+            color="none"
+            :class="{ 'text-gray-400': !partner.audio }"
+          >
+            <ui-icon name="mic" />
+            <ui-icon
+              name="close"
+              class="absolute inset-0 h-full w-full p-1"
+              size="none"
+              v-if="!partner.audio"
+            />
+          </ui-button>
+        </div>
+        <div class="w-auto">
+          <ui-button
+            @click="toggleSound('self')"
+            color="none"
+            class="relative"
+            :class="{ 'text-gray-400': !self.audio }"
+          >
+            <ui-icon name="volume" />
+            <ui-icon
+              name="close"
+              class="absolute inset-0 h-full w-full p-1"
+              size="none"
+              v-if="!self.audio"
+            />
+          </ui-button>
+        </div>
+        <div class="w-auto">
+          <ui-button
+            class="relative"
+            @click="toggleVideo('self')"
+            color="none"
+            :class="{ 'text-gray-400': !self.video }"
+          >
+            <ui-icon name="video" />
+            <ui-icon
+              name="close"
+              class="absolute inset-0 h-full w-full p-1"
+              size="none"
+              v-if="!self.video"
+            />
+          </ui-button>
+        </div>
       </div>
     </div>
   </div>
@@ -92,23 +127,35 @@ export default {
       RTC: undefined,
       calling: false,
       connected: false,
-      offer: undefined,
+      self: {
+        audio: true,
+        video: true,
+      },
+      partner: {
+        audio: true,
+        video: true,
+      },
     };
   },
   computed: {
     contact() {
       return this.$store.getters["contacts/contact"];
     },
+    callTriger() {
+      return this.$store.getters["app/callTriger"];
+    },
+    caller() {
+      return this.$store.getters["app/offer"];
+    },
+  },
+  watch: {
+    callTriger(value) {
+      if (this[value]) {
+        this[value]();
+      }
+    },
   },
   mounted() {
-    $socket.on("offer", (payload) => {
-      $play("ringtone", true);
-
-      this.calling = this.contact.id;
-
-      this.offer = payload.offer;
-    });
-
     $socket.on("candidate", (payload) => {
       if (this.RTC) {
         this.RTC.addIceCandidate(new RTCIceCandidate(payload.candidate));
@@ -135,12 +182,34 @@ export default {
       this.handleHang();
     });
   },
+  beforeUnmount() {
+    $socket.removeAllListeners("candidate");
+    $socket.removeAllListeners("answer");
+    $socket.removeAllListeners("hang");
+    $socket.removeAllListeners("leave");
+  },
   methods: {
+    toggleSound(target) {
+      this.$refs[target].srcObject.getTracks().forEach((t) => {
+        if (t.kind === "audio") {
+          t.enabled = !t.enabled;
+          this[target].audio = t.enabled;
+        }
+      });
+    },
+    toggleVideo(target) {
+      this.$refs[target].srcObject.getTracks().forEach((t) => {
+        if (t.kind === "video") {
+          t.enabled = !t.enabled;
+          this[target].video = t.enabled;
+        }
+      });
+    },
     audioCall() {},
     answer() {
       this.prepare().then(() => {
         this.RTC.setRemoteDescription(
-          new RTCSessionDescription(this.offer)
+          new RTCSessionDescription(this.caller.offer)
         ).then(() => {
           this.RTC.createAnswer()
             .then((answer) => {
@@ -187,6 +256,10 @@ export default {
       this.calling = false;
 
       this.connected = false;
+
+      this.$store.dispatch("app/setPanel", undefined).then(() => {
+        this.$store.dispatch("app/setOffer", undefined);
+      });
     },
     hang() {
       this.handleHang();
@@ -208,6 +281,7 @@ export default {
           this.RTC.ontrack = (event) => {
             // Don't set srcObject again if it is already set.
             if (this.$refs.partner.srcObject) return;
+
             this.$refs.partner.srcObject = event.streams[0];
           };
           this.RTC.onicecandidate = (event) => {
