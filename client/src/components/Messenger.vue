@@ -214,7 +214,7 @@ export default {
       if (!this.contact || this.contact.id !== data.sender) {
         data = { ...data, new: true };
 
-        $play("notify");
+        $play("message");
       }
 
       this.$store.dispatch("messages/addMessage", data);

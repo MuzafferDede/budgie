@@ -4,6 +4,7 @@ import { v4 as uuid } from "uuid";
 
 const audio = {
     notify: new Audio("notify.mp3"),
+    message: new Audio("message.mp3"),
     error: new Audio("error.mp3"),
     ringtone: new Audio("ringtone.mp3"),
     typing: new Audio("typing.mp3"),
