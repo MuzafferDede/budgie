@@ -11,20 +11,17 @@ const io = require("socket.io")(server, {
 const path = require("path");
 
 const PORT = process.env.PORT || 8080;
-// app.get('/', (req, res) => {
-//   res.sendFile(path.join(__dirname, "../client/public", "../index.html"));
-// })
-// REMOVE COMMENTS BELOW WHEN READY TO DEPLOY
-// app.use(express.static(path.join(__dirname, "client/build")));
-// app.get("/*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "client/build", "index.html"));
-// });
 
-// const io = require('socket.io')(5001, {
-//   cors: {
-//     origin: '*',
-//   }
-// })
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+})
+
+
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+app.get("/*", function (req, res) {
+  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+});
 
 let connectedClients = [];
 
