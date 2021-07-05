@@ -47,20 +47,22 @@ export default {
   },
   methods: {
     sendMessage() {
-      if (this.message) {
-        this.$store.dispatch("messages/addMessage", {
-          sender: this.user.id,
-          receiver: this.contact.id,
-          body: this.message,
-          time: new Date(),
-        });
+      this.message = this.message.trim();
+      
+      if (!this.message) return;
 
-        $socket.emit("new message", this.contact.id, this.message);
+      this.$store.dispatch("messages/addMessage", {
+        sender: this.user.id,
+        receiver: this.contact.id,
+        body: this.message.trim(),
+        time: new Date(),
+      });
 
-        this.message = undefined;
+      $socket.emit("new message", this.contact.id, this.message);
 
-        this.$refs.message.focus();
-      }
+      this.message = undefined;
+
+      this.$refs.message.focus();
     },
   },
   computed: {

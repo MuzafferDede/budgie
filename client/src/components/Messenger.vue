@@ -84,7 +84,7 @@
     </div>
     <ui-transition animation="slide">
       <div
-        class="space-y-4 relative bg-white z-30 w-full max-w-sm shadow p-4"
+        class="space-y-4 bg-white z-30 w-full max-w-sm shadow p-4 relative"
         v-if="panel"
       >
         <ui-transition animation="pull">
@@ -145,15 +145,11 @@ export default {
   mounted() {
     this.$store.dispatch("app/setPanel", undefined);
 
-    $socket.on("offer", (payload) => {
-      $play("ringtone", true);
-      this.$store
-        .dispatch("contacts/setCurrentContact", payload.contact)
-        .then(() => {
-          this.$store.dispatch("app/setPanel", "Call").then(() => {
-            this.$store.dispatch("app/setOffer", payload);
-          });
-        });
+    $socket.on("calling", (payload) => {
+      this.$store.dispatch("app/setPanel", "Call").then(() => {
+        this.$store.dispatch("app/setOnCall", { with: payload.caller });
+        $play("ringtone", true);
+      });
     });
 
     $socket.on("contact request", (payload) => {

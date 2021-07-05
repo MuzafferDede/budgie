@@ -12,7 +12,12 @@ const audio = {
 
 let currentAudio;
 
-export const $socket = io("http://localhost:8080", {
+const APP_URL = (() => {
+    const protocol = "http" + (location.hostname == "localhost" ? "" : "s") + "://";
+    return protocol + location.hostname + (location.hostname == "localhost" ? ":8080" : "");
+})();
+
+export const $socket = io(APP_URL, {
     autoConnect: false,
 });
 
@@ -52,4 +57,3 @@ export function $alert(message) {
 export function $uuid() {
     return uuid();
 }
-

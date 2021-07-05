@@ -13,14 +13,14 @@ const path = require("path");
 const PORT = process.env.PORT || 8080;
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+  res.sendFile(path.join(__dirname, "./client/dist", "index.html"));
 })
 
 
-app.use(express.static(path.join(__dirname, "../client/dist")));
+app.use(express.static(path.join(__dirname, "./client/dist")));
 
 app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "../client/dist", "index.html"));
+  res.sendFile(path.join(__dirname, "./client/dist", "index.html"));
 });
 
 let connectedClients = [];
@@ -91,6 +91,7 @@ io.on('connection', (socket) => {
 
   const events = [
     "answer",
+    "calling",
     "candidate",
     "hang",
     "offer",

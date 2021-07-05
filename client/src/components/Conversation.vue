@@ -20,7 +20,6 @@
                   transition-all
                   duration-150
                 "
-                @click="$store.dispatch('app/setAudioCall')"
               >
                 <ui-icon name="call" />
               </button>
@@ -34,7 +33,7 @@
                   transition-all
                   duration-150
                 "
-                @click="$store.dispatch('app/setVideoCall')"
+                @click="startCall"
               >
                 <ui-icon name="video" />
               </button>
@@ -74,6 +73,8 @@ import ContactDetail from "./ContactDetail.vue";
 import UiTransition from "./ui/UiTransition.vue";
 import Contacts from "./Contacts.vue";
 
+import { $play, $socket } from "../utils";
+
 export default {
   components: {
     UiIcon,
@@ -95,8 +96,26 @@ export default {
     contact() {
       return this.$store.getters["contacts/contact"];
     },
+    user() {
+      return this.$store.getters["client/user"];
+    },
     panel() {
       return this.$store.getters["app/panel"];
+    },
+  },
+  methods: {
+    startCall() {
+      this.$store.dispatch("app/setPanel", "Call").then(() => {
+        this.$store
+          .dispatch("app/setOnCall", { with: this.contact })
+          .then(() => {
+            $socket.emit("calling", {
+              contact: this.contact.id,
+              caller: this.user,
+            });
+            $play("ringtone", true);
+          });
+      });
     },
   },
 };
