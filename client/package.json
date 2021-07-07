@@ -2,10 +2,16 @@
   "name": "client",
   "version": "1.0.0",
   "license": "MIT",
+  "engines": {
+    "node": "14.x",
+    "yarn": "1.x",
+    "vite": "2.x"
+  },
   "scripts": {
     "dev": "vite --open --port 5000",
     "build": "vite  build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "moment": "^2.29.1",
