@@ -34,11 +34,11 @@
         </div>
       </div>
       <span class="flex flex-col items-center text-white">
-        <span class="text-lg">{{ caller.name }}</span>
+        <span class="text-lg" v-if="onCall.with">{{ onCall.with.name }}</span>
         <span v-if="!connected" class="text-sm">Video calling...</span>
       </span>
       <div class="flex justify-center space-x-4">
-        <div class="w-auto" v-if="caller && !connected">
+        <div class="w-auto" v-if="!onCall.caller && !connected">
           <ui-button @click="offer" class="animate-pulse">
             <ui-icon name="call" />
           </ui-button>
@@ -142,13 +142,12 @@ export default {
     contact() {
       return this.$store.getters["contacts/contact"];
     },
-    caller() {
-      return this.$store.getters["app/onCall"].with;
+    onCall() {
+      return this.$store.getters["app/onCall"];
     },
   },
   mounted() {
     this.prepare();
-
     $socket.on("answer", (payload) => {
       this.RTC.setRemoteDescription(
         new RTCSessionDescription(payload.answer)
@@ -297,7 +296,7 @@ export default {
         });
     },
     send(type, data) {
-      data = { ...data, contact: this.caller.id };
+      data = { ...data, contact: this.onCall.with.id };
       $socket.emit(type, data);
     },
     videoCall() {

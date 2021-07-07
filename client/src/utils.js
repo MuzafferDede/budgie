@@ -34,6 +34,7 @@ export function $play(type, loop = false, play = true) {
     currentAudio = audio[type];
 
     currentAudio.currentTime = 0;
+
     currentAudio.loop = loop;
 
     if (!play) {

@@ -153,38 +153,32 @@ export default {
     });
 
     $socket.on("contact request", (payload) => {
-      const isContactExists = this.contacts.find(
-        (contact) => contact.id === payload.id && contact.socketId
-      );
-
-      if (!isContactExists) {
-        this.$store
-          .dispatch("notifications/addNotification", {
+      this.$store
+        .dispatch("notifications/addNotification", {
+          title: "Contact Request",
+          body: `${payload.id} sent you a contact request.`,
+          time: new Date(),
+          actions: [
+            {
+              label: "Delete",
+              dispatch: "notifications/removeNotification",
+              data: payload,
+            },
+            {
+              label: "Accept",
+              dispatch: "contacts/acceptContactRequest",
+              data: payload,
+            },
+          ],
+        })
+        .then(() => {
+          $play("notify");
+          this.$store.dispatch("app/setAlert", {
             title: "Contact Request",
-            body: `${payload.id} sent you a contact request.`,
-            time: new Date(),
-            actions: [
-              {
-                label: "Delete",
-                dispatch: "notifications/removeNotification",
-                data: payload,
-              },
-              {
-                label: "Accept",
-                dispatch: "contacts/acceptContactRequest",
-                data: payload,
-              },
-            ],
-          })
-          .then(() => {
-            $play("notify");
-            this.$store.dispatch("app/setAlert", {
-              title: "Contact Request",
-              body: `You have new contact request from ${payload.id}.`,
-              color: "blue",
-            });
+            body: `You have new contact request from ${payload.id}.`,
+            color: "blue",
           });
-      }
+        });
     });
 
     $socket.on("contact not found", (request) => {

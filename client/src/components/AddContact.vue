@@ -77,6 +77,16 @@ export default {
           $socket.emit("add contact", this.contactId);
 
           this.contactId = undefined;
+        })
+        .then(() => {
+          this.$store.dispatch("app/setAlert", {
+            title: "Sent",
+            body: "Your request has been sent",
+            color: "green",
+          });
+        })
+        .then(() => {
+          this.$store.dispatch("app/setPanel", undefined);
         });
     },
   },

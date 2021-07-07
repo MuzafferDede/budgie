@@ -107,7 +107,7 @@ export default {
     startCall() {
       this.$store.dispatch("app/setPanel", "Call").then(() => {
         this.$store
-          .dispatch("app/setOnCall", { with: this.contact })
+          .dispatch("app/setOnCall", { with: this.contact, caller: true })
           .then(() => {
             $socket.emit("calling", {
               contact: this.contact.id,

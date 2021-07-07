@@ -23,7 +23,7 @@ export default {
             state.panel = state.panel === payload ? undefined : payload
         },
         SET_ON_CALL(state, payload) {
-            state.onCall = { ...state.onCall, ...payload }
+            state.onCall = payload
         },
     },
     actions: {

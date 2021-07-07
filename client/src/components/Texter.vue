@@ -45,10 +45,13 @@ export default {
       message: undefined,
     };
   },
+  mounted() {
+    this.$refs.message.focus();
+  },
   methods: {
     sendMessage() {
       this.message = this.message.trim();
-      
+
       if (!this.message) return;
 
       this.$store.dispatch("messages/addMessage", {
