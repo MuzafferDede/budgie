@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { $play, $socket } from "../utils";
+import { $play, $socket, $notify } from "../utils";
 import AddContact from "./AddContact.vue";
 import UiIcon from "./ui/UiIcon.vue";
 import Conversation from "./Conversation.vue";
@@ -217,7 +217,12 @@ export default {
         $play("message");
       }
 
-      this.$store.dispatch("messages/addMessage", data);
+      this.$store.dispatch("messages/addMessage", data).then(() => {
+        $notify({
+          title: this.$store.getters["contacts/find"](data.sender).name,
+          body: data.body,
+        });
+      });
     });
 
     $socket.on("contact left", (contact) => {

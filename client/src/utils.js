@@ -46,8 +46,11 @@ export function $play(type, loop = false, play = true) {
 
 export function $copy(element) {
     element.target.select();
+
     document.execCommand('copy');
+
     window.getSelection().removeAllRanges();
+
     return true;
 }
 
@@ -57,4 +60,13 @@ export function $alert(message) {
 
 export function $uuid() {
     return uuid();
+}
+
+
+export function $notify(notification) {
+    if (Notification.permission !== 'denied') Notification.requestPermission();
+
+    if (document.visibilityState === 'visible') return;
+
+    if (Notification.permission === 'granted') new Notification(notification.title, { body: notification.body, icon: '/logo.png' })
 }

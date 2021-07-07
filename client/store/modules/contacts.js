@@ -15,6 +15,9 @@ export default {
         contact: state => {
             return state.current
         },
+        find: state => (id) => {
+            return state.items.find(item => item.id === id)
+        }
     },
     mutations: {
         ADD_CONTACT(state, payload) {

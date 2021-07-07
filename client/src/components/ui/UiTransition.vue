@@ -53,10 +53,10 @@ export default {
           leaveTo: "transform opacity-0 translate-y-full",
         },
         slide: {
-          enterFrom: "transform opacity-0 translate-x-full",
-          enterTo: "transform opacity-100 translate-x-0",
-          leaveFrom: "transform opacity-100 translate-x-0",
-          leaveTo: "transform opacity-0 translate-x-full",
+          enterFrom: "transform opacity-0 -mr-96",
+          enterTo: "transform opacity-100 mr-0",
+          leaveFrom: "transform opacity-100 mr-0",
+          leaveTo: "transform opacity-0 -mr-96",
         },
         scale: {
           enterFrom: "transform opacity-0 scale-95",

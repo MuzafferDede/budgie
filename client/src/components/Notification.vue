@@ -26,7 +26,7 @@
 <script>
 import UiButton from "./ui/UiButton.vue";
 import UiIcon from "./ui/UiIcon.vue";
-import { $time } from "../utils";
+import { $time, $notify } from "../utils";
 export default {
   components: { UiIcon, UiButton },
   props: {
@@ -37,6 +37,9 @@ export default {
   },
   methods: {
     $time,
+  },
+  mounted() {
+    $notify(this.info);
   },
 };
 </script>
