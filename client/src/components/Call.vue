@@ -1,18 +1,48 @@
 <template>
   <div class="bg-gray-700 p-4 h-full rounded-lg space-y-4 overflow-auto">
     <div class="flex flex-col w-full" v-show="connected">
-      <div class="p-2 w-full" v-show="connected">
+      <div class="p-2 w-full relative">
         <video
-          class="w-full h-full object-cover rounded-lg"
-          ref="partner"
-          @loadedmetadata="$event.target.play()"
-        />
-      </div>
-      <div class="p-2 w-full">
-        <video
+          controls="false"
           muted
           class="w-full h-full object-cover rounded-lg"
           ref="self"
+          @loadedmetadata="$event.target.play()"
+        />
+        <div
+          class="
+            flex
+            justify-center
+            space-x-4
+            absolute
+            bottom-0
+            right-0
+            m-4
+            text-white
+          "
+        >
+          <div class="w-auto">
+            <button class="relative" @click="$refs.partner.requestFullscreen()">
+              <ui-icon name="fullscreen" />
+            </button>
+          </div>
+          <div class="w-auto">
+            <button class="relative" @click="toggleSound('partner')">
+              <ui-icon name="volume" />
+              <ui-icon
+                name="close"
+                class="absolute inset-0 h-full w-full text-red-500"
+                size="none"
+                v-if="!partner.audio"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="p-2 w-full">
+        <video
+          class="w-full h-full object-cover rounded-lg"
+          ref="partner"
           @loadedmetadata="$event.target.play()"
         />
       </div>
@@ -52,28 +82,12 @@
       <div class="flex justify-center space-x-4 text-white" v-if="connected">
         <div class="w-auto">
           <ui-button
-            class="relative"
-            @click="toggleSound('partner')"
-            color="none"
-            :class="{ 'text-gray-400': !partner.audio }"
-          >
-            <ui-icon name="mic" />
-            <ui-icon
-              name="close"
-              class="absolute inset-0 h-full w-full p-1"
-              size="none"
-              v-if="!partner.audio"
-            />
-          </ui-button>
-        </div>
-        <div class="w-auto">
-          <ui-button
             @click="toggleSound('self')"
             color="none"
             class="relative"
             :class="{ 'text-gray-400': !self.audio }"
           >
-            <ui-icon name="volume" />
+            <ui-icon name="mic" />
             <ui-icon
               name="close"
               class="absolute inset-0 h-full w-full p-1"
@@ -263,7 +277,7 @@ export default {
     },
     prepare() {
       return navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
+        .getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
         .then((stream) => {
           this.sessionStream = stream;
 

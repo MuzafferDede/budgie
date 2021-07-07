@@ -9,6 +9,7 @@ import call from "../../assets/icons/svg/call.svg";
 import check from "../../assets/icons/svg/check.svg";
 import close from "../../assets/icons/svg/close.svg";
 import contacts from "../../assets/icons/svg/contacts.svg";
+import fullscreen from "../../assets/icons/svg/fullscreen.svg";
 import hang from "../../assets/icons/svg/hang.svg";
 import notification from "../../assets/icons/svg/notification.svg";
 import mic from "../../assets/icons/svg/mic.svg";
@@ -26,6 +27,7 @@ const icons = {
   check,
   close,
   contacts,
+  fullscreen,
   hang,
   notification,
   mic,
