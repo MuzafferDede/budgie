@@ -3,10 +3,8 @@
     <div class="flex flex-col w-full" v-show="connected">
       <div class="p-2 w-full relative">
         <video
-          controls="false"
-          muted
           class="w-full h-full object-cover rounded-lg"
-          ref="self"
+          ref="partner"
           @loadedmetadata="$event.target.play()"
         />
         <div
@@ -39,10 +37,12 @@
           </div>
         </div>
       </div>
-      <div class="p-2 w-full">
+      <div class="p-2 w-full relative">
         <video
+          controls="false"
+          muted
           class="w-full h-full object-cover rounded-lg"
-          ref="partner"
+          ref="self"
           @loadedmetadata="$event.target.play()"
         />
       </div>
