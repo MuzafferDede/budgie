@@ -61,7 +61,15 @@
         <video
           controls="false"
           muted
-          class="w-full h-full object-cover rounded-lg bg-gray-500"
+          class="
+            w-full
+            h-full
+            object-cover
+            rounded-lg
+            bg-gray-500
+            transform
+            -scale-x-1
+          "
           ref="self"
           @loadedmetadata="$event.target.play()"
         />
