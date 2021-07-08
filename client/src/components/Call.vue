@@ -93,7 +93,7 @@
       </div>
       <span class="flex flex-col items-center text-white">
         <span class="text-lg" v-if="onCall.with">{{ onCall.with.name }}</span>
-        <span>{{ timer }}</span>
+        <span v-if="connected">{{ timer }}</span>
         <span v-if="!connected" class="text-sm"
           >{{ onCall.video ? "Video" : "" }} Calling...</span
         >
@@ -145,7 +145,7 @@
             />
           </ui-button>
         </div>
-        <div class="w-auto" v-if="connected">
+        <div class="w-auto" v-if="connected && onCall.video">
           <ui-button
             title="Turn off your camera"
             class="relative"
