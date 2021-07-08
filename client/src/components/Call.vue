@@ -10,7 +10,7 @@
             rounded-lg
             bg-gray-500
             transform
-            -scale-1
+            -scale-x-1
           "
           ref="partner"
           @loadedmetadata="$event.target.play()"
