@@ -369,7 +369,7 @@ export default {
       this.$refs[target].srcObject.getTracks().forEach((t) => {
         if (t.kind === media) {
           t.enabled = !t.enabled;
-          this[target].audio = t.enabled;
+          this[target][media] = t.enabled;
         }
       });
     },
