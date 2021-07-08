@@ -12,6 +12,7 @@
             <ui-button
               title="Show notifications"
               color="white"
+              class="relative"
               :class="{
                 'bg-gray-100': panel === 'Notifications',
               }"
@@ -80,7 +81,7 @@
         </div>
       </div>
       <div class="flex flex-1 divide-x overflow-auto">
-        <conversation v-if="contacts.length" />
+        <conversation />
       </div>
     </div>
     <ui-transition animation="slide">

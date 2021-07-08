@@ -48,8 +48,8 @@
               currentContact && contact.id === currentContact.id,
           }"
         >
-          <div class="grid grid-cols-6 py-4 px-3 items-center">
-            <div class="relative col-span-1">
+          <div class="flex space-x-2 py-4 px-3 items-center">
+            <div class="relative py-1">
               <div
                 class="
                   w-10
