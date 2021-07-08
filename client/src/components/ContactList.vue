@@ -14,6 +14,7 @@
         ring-1 ring-gray-200
         focus:ring-blue-300 focus:ring-2
       "
+      @keydown.enter.prevent="addContact"
     />
     <div class="flex flex-col space-y-4">
       <ui-button size="sm" @click="addContact">Add Contact</ui-button>

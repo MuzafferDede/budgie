@@ -26,6 +26,9 @@ export function $time(time) {
     return time ? moment(time).fromNow() : undefined;
 }
 
+export const $moment = moment;
+
+
 export function $play(type, loop = false, play = true) {
 
     if (currentAudio) {

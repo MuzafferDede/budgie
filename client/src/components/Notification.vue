@@ -5,9 +5,11 @@
       <strong>{{ info.title }}</strong>
       <div class="space-y-1">
         <p class="text-sm">{{ info.body }}</p>
-        <span class="flex-shrink-0 text-xs text-blue-400 italic">{{
-          $time(info.time)
-        }}</span>
+        <span
+          class="flex-shrink-0 text-xs text-blue-400 italic"
+          v-if="info.time"
+          >{{ $time(info.time) }}</span
+        >
       </div>
       <div v-if="info.actions" class="flex space-x-4 border-t pt-2">
         <ui-button

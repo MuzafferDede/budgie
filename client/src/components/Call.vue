@@ -93,6 +93,7 @@
       </div>
       <span class="flex flex-col items-center text-white">
         <span class="text-lg" v-if="onCall.with">{{ onCall.with.name }}</span>
+        <span>{{ timer }}</span>
         <span v-if="!connected" class="text-sm"
           >{{ onCall.video ? "Video" : "" }} Calling...</span
         >
@@ -167,7 +168,7 @@
 </template>
 
 <script>
-import { $socket, $play } from "../utils";
+import { $socket, $play, $moment } from "../utils";
 import UiButton from "./ui/UiButton.vue";
 import UiIcon from "./ui/UiIcon.vue";
 
@@ -192,6 +193,7 @@ export default {
       connected: false,
       silence: false,
       sessionStream: undefined,
+      duration: 0,
       self: {
         audio: true,
         video: true,
@@ -225,7 +227,16 @@ export default {
         audio: true,
       };
     },
+    timer() {
+      return this.connected
+        ? $moment(this.connected)
+            .utc()
+            .add(this.duration, "seconds")
+            .format("HH:mm:ss")
+        : false;
+    },
   },
+
   mounted() {
     this.prepare();
 
@@ -264,7 +275,7 @@ export default {
           this.RTC.setLocalDescription(answer).then(() => {
             this.send("answer", { answer });
 
-            this.connected = true;
+            this.callStarted();
 
             $play("ringtone", false, false);
           });
@@ -279,7 +290,7 @@ export default {
           this.RTC.setLocalDescription(offer).then(() => {
             this.send("offer", { offer });
 
-            this.connected = true;
+            this.callStarted();
 
             $play("ringtone", false, false);
           });
@@ -361,6 +372,13 @@ export default {
           this[target].audio = t.enabled;
         }
       });
+    },
+    callStarted() {
+      this.connected = 1;
+
+      setInterval(() => {
+        this.duration++;
+      }, 1000);
     },
   },
 };
