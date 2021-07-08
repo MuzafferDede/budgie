@@ -10,10 +10,12 @@ const colors = {
   green: "bg-green-400 hover:bg-green-500 text-white",
   blue: "bg-blue-400 hover:bg-blue-500 text-white",
   red: "bg-red-400 hover:bg-red-500 text-white",
+  gray: "bg-gray-400 hover:bg-gray-500 text-white",
+  white: "bg-white hover:bg-gray-100 shadow",
 };
 
 const sizes = {
-  sm: "px-2 py-1 text-sm",
+  sm: "px-2 py-2 text-sm",
   base: "px-3 py-3 text-lg",
   lg: "px-5 py-5 text-lg",
   xl: "px-8 py-8 text-2xl",

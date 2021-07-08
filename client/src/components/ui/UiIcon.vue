@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import add from "../../assets/icons/svg/add.svg";
 import avatar from "../../assets/icons/svg/avatar.svg";
 import arrow from "../../assets/icons/svg/arrow.svg";
 import call from "../../assets/icons/svg/call.svg";
@@ -17,10 +18,12 @@ import mute from "../../assets/icons/svg/mute.svg";
 import options from "../../assets/icons/svg/options.svg";
 import user from "../../assets/icons/svg/user.svg";
 import send from "../../assets/icons/svg/send.svg";
+import silence from "../../assets/icons/svg/silence.svg";
 import video from "../../assets/icons/svg/video.svg";
 import volume from "../../assets/icons/svg/volume.svg";
 
 const icons = {
+  add,
   avatar,
   arrow,
   call,
@@ -35,6 +38,7 @@ const icons = {
   options,
   user,
   send,
+  silence,
   video,
   volume,
 };

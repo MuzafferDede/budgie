@@ -10,6 +10,7 @@
     "
   >
     <button
+      title="Budgie Messenger"
       @click="$store.dispatch('app/setPanel', undefined)"
       class="p-2 bg-white rounded-full text-gray-900 shadow"
     >
@@ -17,8 +18,9 @@
     </button>
     <div class="py-4 space-y-5 flex-col flex">
       <button
+        title="Add contact"
         class="bg-gray-600 hover:bg-gray-700 p-3 rounded-full"
-        @click="$store.dispatch('app/setPanel', 'AddContact')"
+        @click="$store.dispatch('app/setPanel', undefined)"
       >
         <ui-icon name="contacts" />
       </button>

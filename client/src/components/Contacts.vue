@@ -1,5 +1,21 @@
 <template>
-  <div class="max-w-sm w-full flex flex-col flex-shrink-0 divide-y">
+  <div
+    class="lg:max-w-sm w-full flex-col flex-shrink-0 divide-y lg:flex"
+    :class="{ hidden: !panel && currentContact }"
+  >
+    <div class="p-3.5 bg-white flex items-center justify-between">
+      <h2 class="text-2xl text-gray-900">Contacts</h2>
+      <div class="w-auto flex-0">
+        <ui-button
+          :disabled="panel === 'ContactList'"
+          :class="{ 'opacity-0': panel === 'ContactList' }"
+          size="sm"
+          @click="$store.dispatch('app/setPanel', 'ContactList')"
+        >
+          <ui-icon name="add" color="green" />
+        </ui-button>
+      </div>
+    </div>
     <div class="p-3 flex-none">
       <input
         type="text"
@@ -26,18 +42,18 @@
           :key="contact.id"
           @click.prevent="setCurrentContact(contact)"
           :class="{
+            'hover:bg-gray-100 bg-gray-50 ':
+              !currentContact || contact.id !== currentContact.id,
             'bg-blue-100 hover:bg-blue-100':
               currentContact && contact.id === currentContact.id,
-            'hover:bg-gray-100':
-              currentContact && contact.id !== currentContact.id,
           }"
         >
-          <div class="grid grid-cols-6 gap-2 py-4 px-3 items-center">
+          <div class="grid grid-cols-6 py-4 px-3 items-center">
             <div class="relative col-span-1">
               <div
                 class="
-                  h-12
-                  w-12
+                  w-10
+                  h-10
                   flex
                   rounded-full
                   items-center
@@ -45,6 +61,12 @@
                   shadow
                   relative
                 "
+                :class="{
+                  'animate-bounce':
+                    onCall.with &&
+                    onCall.with.id === contact.id &&
+                    panel !== 'Call',
+                }"
               >
                 <div
                   class="
@@ -60,7 +82,7 @@
                   "
                   :class="{ 'animate-spin': isTyping(contact) }"
                 ></div>
-                <ui-icon name="avatar" size="lg" class="text-gray-900 z-10" />
+                <ui-icon name="avatar" class="text-gray-900 z-10" />
               </div>
             </div>
             <div class="flex flex-col w-full relative col-span-5">
@@ -128,9 +150,10 @@
 import { $time, $socket, $play } from "../utils";
 import UiTransition from "./ui/UiTransition.vue";
 import UiIcon from "./ui/UiIcon.vue";
+import UiButton from "./ui/UiButton.vue";
 
 export default {
-  components: { UiTransition, UiIcon },
+  components: { UiTransition, UiIcon, UiButton },
   data() {
     return {
       findContact: "",
@@ -195,6 +218,12 @@ export default {
     lastMessage() {
       return (contact) =>
         this.$store.getters["messages/last"](this.user.id, contact.id);
+    },
+    onCall() {
+      return this.$store.getters["app/onCall"];
+    },
+    panel() {
+      return this.$store.getters["app/panel"];
     },
   },
   methods: {

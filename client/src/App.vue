@@ -40,9 +40,6 @@ export default {
     user() {
       return this.$store.getters["client/user"];
     },
-    event() {
-      return this.$store.getters["app/event"];
-    },
   },
   data() {
     return {
@@ -60,13 +57,6 @@ export default {
   },
   beforeUnmount() {
     $socket.removeAllListeners("disconnect");
-  },
-  watch: {
-    event(event) {
-      if (this[event.name]) {
-        this[event.name]();
-      }
-    },
   },
   methods: {
     login(user) {

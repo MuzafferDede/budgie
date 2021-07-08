@@ -1,22 +1,19 @@
 <template>
   <div class="h-screen overflow-hidden bg-white flex w-full">
     <side-panel />
-    <div class="w-full flex flex-col overflow-hidden">
+    <div
+      class="w-full flex-col overflow-hidden lg:flex"
+      :class="{ hidden: panel, flex: !panel }"
+    >
       <div class="border-b flex items-center justify-between flex-none">
-        <h1 class="text-2xl p-4 text-gray-900">Budgie</h1>
-        <div class="w-80 flex space-x-4 relative p-4">
+        <h1 class="hidden lg:block text-2xl p-4 text-gray-900">Budgie</h1>
+        <div class="w-full lg:w-80 flex lg:space-x-4 relative p-4">
           <div class="group">
-            <button
-              class="
-                p-2
-                group-hover:bg-gray-500 group-hover:text-white
-                rounded-full
-                relative
-                shadow-md
-                border
-              "
+            <ui-button
+              title="Show notifications"
+              color="white"
               :class="{
-                'bg-gray-500 text-white': panel === 'Notifications',
+                'bg-gray-100': panel === 'Notifications',
               }"
               @click="$store.dispatch('app/setPanel', 'Notifications')"
             >
@@ -42,23 +39,27 @@
                 >{{ notifications.length }}</span
               >
               <ui-icon name="notification" />
-            </button>
+            </ui-button>
           </div>
-          <div class="pl-4 border-l w-full">
+          <div class="pl-4 lg:border-l lg:w-full ml-auto">
             <button
+              title="Profile"
               class="flex w-full space-x-2 items-center text-left group"
               @click="$store.dispatch('app/setPanel', 'Profile')"
             >
               <span
                 class="
-                  p-2
-                  group-hover:bg-gray-500 group-hover:text-white
                   rounded-full
-                  relative
-                  shadow-md
-                  border
+                  bg-white
+                  group-hover:bg-gray-100 group-hover:bg-gray-100
+                  shadow
+                  px-3
+                  py-3
+                  text-lg
                 "
-                :class="{ 'bg-gray-500 text-white': panel === 'Profile' }"
+                :class="{
+                  'bg-gray-100': panel === 'Profile',
+                }"
               >
                 <ui-icon name="avatar" />
               </span>
@@ -79,12 +80,12 @@
         </div>
       </div>
       <div class="flex flex-1 divide-x overflow-auto">
-        <conversation />
+        <conversation v-if="contacts.length" />
       </div>
     </div>
     <ui-transition animation="slide">
       <div
-        class="space-y-4 bg-white z-30 w-full max-w-sm shadow p-4 relative"
+        class="space-y-4 bg-white z-30 w-full lg:max-w-sm shadow p-4 relative"
         v-if="panel"
       >
         <ui-transition animation="pull">
@@ -97,18 +98,19 @@
 
 <script>
 import { $play, $socket, $notify } from "../utils";
-import AddContact from "./AddContact.vue";
 import UiIcon from "./ui/UiIcon.vue";
 import Conversation from "./Conversation.vue";
+import ContactList from "./ContactList.vue";
 import UiTransition from "./ui/UiTransition.vue";
 import Notifications from "./Notifications.vue";
 import Profile from "./Profile.vue";
 import SidePanel from "./SidePanel.vue";
 import Call from "./Call.vue";
+import UiButton from "./ui/UiButton.vue";
 
 export default {
   components: {
-    AddContact,
+    ContactList,
     Conversation,
     UiTransition,
     UiIcon,
@@ -116,6 +118,7 @@ export default {
     Profile,
     SidePanel,
     Call,
+    UiButton,
   },
   data() {
     return {
@@ -142,14 +145,28 @@ export default {
       return this.$options.components[this.panel];
     },
   },
-  mounted() {
-    this.$store.dispatch("app/setPanel", undefined);
+  beforeCreate() {
+    this.$store.dispatch("app/setPanel", undefined).then(() => {
+      const onCall = this.$store.getters["app/onCall"];
 
+      if (onCall.with) {
+        $socket.emit("hang", { contact: onCall.with.id });
+
+        this.$store.dispatch("app/setOnCall", {});
+      }
+    });
+  },
+  mounted() {
     $socket.on("calling", (payload) => {
-      this.$store.dispatch("app/setPanel", "Call").then(() => {
-        this.$store.dispatch("app/setOnCall", { with: payload.caller });
-        $play("ringtone", true);
-      });
+      this.$store
+        .dispatch("app/setOnCall", {
+          with: payload.caller,
+          video: payload.video,
+        })
+        .then(() => {
+          this.$store.dispatch("app/setPanel", "Call");
+          $play("ringtone", true);
+        });
     });
 
     $socket.on("contact request", (payload) => {
@@ -224,18 +241,13 @@ export default {
         });
       });
     });
-
-    $socket.on("contact left", (contact) => {
-      //this.$store.dispatch('contacts/setContactStatus', contact)
-    });
   },
   beforeUnmount() {
-    $socket.removeAllListeners("offer");
+    $socket.removeAllListeners("calling");
     $socket.removeAllListeners("contact request");
     $socket.removeAllListeners("contact not found");
     $socket.removeAllListeners("request accepted");
     $socket.removeAllListeners("new message");
-    $socket.removeAllListeners("contact left");
   },
   methods: {
     $play,

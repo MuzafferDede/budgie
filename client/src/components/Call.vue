@@ -3,7 +3,7 @@
     <div class="flex flex-col w-full" v-show="connected">
       <div class="p-2 w-full relative">
         <video
-          class="w-full h-full object-cover rounded-lg"
+          class="w-full h-full object-cover rounded-lg bg-gray-500"
           ref="partner"
           @loadedmetadata="$event.target.play()"
         />
@@ -20,12 +20,21 @@
           "
         >
           <div class="w-auto">
-            <button class="relative" @click="$refs.partner.requestFullscreen()">
+            <button
+              title="Switch to full screen"
+              class="relative"
+              @click="$refs.partner.requestFullscreen()"
+              v-if="onCall.video"
+            >
               <ui-icon name="fullscreen" />
             </button>
           </div>
           <div class="w-auto">
-            <button class="relative" @click="toggleSound('partner')">
+            <button
+              title="Mute audio"
+              class="relative"
+              @click="toggleMedia('partner', 'audio')"
+            >
               <ui-icon name="volume" />
               <ui-icon
                 name="close"
@@ -37,11 +46,14 @@
           </div>
         </div>
       </div>
-      <div class="p-2 w-full relative">
+      <div
+        class="p-2 w-full relative"
+        :class="{ 'h-0 w-0 overflow-hidden': !onCall.video }"
+      >
         <video
           controls="false"
           muted
-          class="w-full h-full object-cover rounded-lg"
+          class="w-full h-full object-cover rounded-lg bg-gray-500"
           ref="self"
           @loadedmetadata="$event.target.play()"
         />
@@ -65,24 +77,44 @@
       </div>
       <span class="flex flex-col items-center text-white">
         <span class="text-lg" v-if="onCall.with">{{ onCall.with.name }}</span>
-        <span v-if="!connected" class="text-sm">Video calling...</span>
+        <span v-if="!connected" class="text-sm"
+          >{{ onCall.video ? "Video" : "" }} Calling...</span
+        >
       </span>
       <div class="flex justify-center space-x-4">
         <div class="w-auto" v-if="!onCall.caller && !connected">
-          <ui-button @click="offer" class="animate-pulse">
+          <ui-button title="Answer" @click="offer" class="animate-pulse">
             <ui-icon name="call" />
           </ui-button>
         </div>
         <div class="w-auto">
-          <ui-button @click="hang" color="red">
+          <ui-button title="Hang up" @click="hang" color="red">
             <ui-icon name="call" class="transform rotate-180" />
           </ui-button>
         </div>
       </div>
-      <div class="flex justify-center space-x-4 text-white" v-if="connected">
-        <div class="w-auto">
+      <div class="flex justify-center space-x-4 text-white">
+        <div class="w-auto" v-if="!connected">
           <ui-button
-            @click="toggleSound('self')"
+            title="Silence"
+            class="relative"
+            @click="setSilence"
+            color="none"
+            :class="{ 'text-gray-400': silence }"
+          >
+            <ui-icon name="silence" />
+            <ui-icon
+              name="close"
+              class="absolute inset-0 h-full w-full p-1"
+              size="none"
+              v-if="silence"
+            />
+          </ui-button>
+        </div>
+        <div class="w-auto" v-if="connected">
+          <ui-button
+            title="Mute your microphone"
+            @click="toggleMedia('self', 'audio')"
             color="none"
             class="relative"
             :class="{ 'text-gray-400': !self.audio }"
@@ -96,10 +128,11 @@
             />
           </ui-button>
         </div>
-        <div class="w-auto">
+        <div class="w-auto" v-if="connected">
           <ui-button
+            title="Turn off your camera"
             class="relative"
-            @click="toggleVideo('self')"
+            @click="toggleMedia('self', 'video')"
             color="none"
             :class="{ 'text-gray-400': !self.video }"
           >
@@ -141,6 +174,7 @@ export default {
       RTC: undefined,
       calling: false,
       connected: false,
+      silence: false,
       sessionStream: undefined,
       self: {
         audio: true,
@@ -159,9 +193,16 @@ export default {
     onCall() {
       return this.$store.getters["app/onCall"];
     },
+    config() {
+      return {
+        video: this.onCall.video ? { width: 1280, height: 720 } : false,
+        audio: true,
+      };
+    },
   },
   mounted() {
     this.prepare();
+
     $socket.on("answer", (payload) => {
       this.RTC.setRemoteDescription(
         new RTCSessionDescription(payload.answer)
@@ -175,13 +216,8 @@ export default {
     });
 
     $socket.on("hang", () => {
-      this.handleHang();
+      this.hang();
     });
-
-    $socket.on("leave", () => {
-      this.handleHang();
-    });
-
     $socket.on("offer", (payload) => {
       this.RTC.setRemoteDescription(new RTCSessionDescription(payload.offer))
         .then(() => {
@@ -193,28 +229,9 @@ export default {
   beforeUnmount() {
     $socket.removeAllListeners("answer");
     $socket.removeAllListeners("candidate");
-    $socket.removeAllListeners("hang");
-    $socket.removeAllListeners("leave");
     $socket.removeAllListeners("offer");
   },
   methods: {
-    toggleSound(target) {
-      this.$refs[target].srcObject.getTracks().forEach((t) => {
-        if (t.kind === "audio") {
-          t.enabled = !t.enabled;
-          this[target].audio = t.enabled;
-        }
-      });
-    },
-    toggleVideo(target) {
-      this.$refs[target].srcObject.getTracks().forEach((t) => {
-        if (t.kind === "video") {
-          t.enabled = !t.enabled;
-          this[target].video = t.enabled;
-        }
-      });
-    },
-    audioCall() {},
     answer() {
       this.RTC.createAnswer()
         .then((answer) => {
@@ -245,11 +262,11 @@ export default {
           this.$log(error);
         });
     },
-    handleHang() {
-      if (this.connected) {
-        this.$refs.partner.srcObject = undefined;
+    hang() {
+      $play("ringtone", false, false);
 
-        this.$refs.self.srcObject = undefined;
+      if (this.connected) {
+        this.connected = false;
 
         this.sessionStream.getTracks().forEach((track) => {
           track.stop();
@@ -260,24 +277,18 @@ export default {
 
       this.RTC = undefined;
 
-      $play("ringtone", false, false);
-
       this.calling = false;
-
-      this.connected = false;
 
       this.$store.dispatch("app/setPanel", undefined).then(() => {
         this.$store.dispatch("app/setOnCall", {});
+        $socket.removeAllListeners("hang");
       });
-    },
-    hang() {
-      this.handleHang();
 
       this.send("hang");
     },
     prepare() {
       return navigator.mediaDevices
-        .getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
+        .getUserMedia(this.config)
         .then((stream) => {
           this.sessionStream = stream;
 
@@ -313,10 +324,16 @@ export default {
       data = { ...data, contact: this.onCall.with.id };
       $socket.emit(type, data);
     },
-    videoCall() {
-      this.calling = true;
-      this.prepare().then(() => {
-        this.offer();
+    setSilence() {
+      $play("ringtone", false, false);
+      this.silence = true;
+    },
+    toggleMedia(target, media) {
+      this.$refs[target].srcObject.getTracks().forEach((t) => {
+        if (t.kind === media) {
+          t.enabled = !t.enabled;
+          this[target].audio = t.enabled;
+        }
       });
     },
   },

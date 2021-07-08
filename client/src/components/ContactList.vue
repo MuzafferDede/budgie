@@ -16,11 +16,14 @@
       "
     />
     <div class="flex flex-col space-y-4">
-      <ui-button @click="addContact">Add Contact</ui-button>
+      <ui-button size="sm" @click="addContact">Add Contact</ui-button>
     </div>
     <div class="flex flex-col space-y-4">
-      <ui-button @click="$store.dispatch('contacts/removeAllContacts')"
-        >Delete All
+      <ui-button
+        size="sm"
+        color="blue"
+        @click="$store.dispatch('app/setPanel', undefined)"
+        >Cancel
       </ui-button>
     </div>
   </div>

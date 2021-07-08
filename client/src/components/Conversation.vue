@@ -1,57 +1,78 @@
 <template>
   <div class="flex w-full divide-x">
-    <contacts v-if="contacts.length" />
+    <contacts />
     <ui-transition animation="scale">
       <div
         class="w-full flex-1 flex flex-col bg-gray-50 min-w-min divide-y"
         v-if="contact"
       >
-        <div class="p-3.5 bg-white flex items-center justify-between">
-          <h2 class="text-2xl text-gray-900">{{ contact.name }}</h2>
-          <div class="flex items-center space-x-2">
-            <div class="flex items-center space-x-2" v-if="panel !== 'Call'">
-              <button
-                class="
-                  p-2
-                  hover:bg-gray-100
-                  rounded-full
-                  relative
-                  shadow-md
-                  transition-all
-                  duration-150
+        <div
+          class="
+            p-2.5
+            bg-white
+            flex flex-col
+            lg:flex-row
+            lg:items-center
+            lg:justify-between
+            space-y-2
+            lg:space-y-0
+          "
+        >
+          <div class="flex space-x-2 items-center">
+            <div class="w-auto flex-0">
+              <ui-button
+                color="white"
+                @click="
+                  $store.dispatch('contacts/setCurrentContact', undefined)
                 "
+              >
+                <ui-icon name="arrow" class="transform rotate-90" />
+              </ui-button>
+            </div>
+            <h2 class="text-2xl text-gray-900">{{ contact.name }}</h2>
+          </div>
+          <div class="flex items-center space-x-2 justify-end">
+            <div class="flex items-center space-x-2">
+              <ui-button
+                title="Start audio call"
+                color="white"
+                v-if="!onCall.with"
+                @click="startCall()"
               >
                 <ui-icon name="call" />
-              </button>
-              <button
-                class="
-                  p-2
-                  hover:bg-gray-100
-                  rounded-full
-                  relative
-                  shadow-md
-                  transition-all
-                  duration-150
-                "
-                @click="startCall"
+              </ui-button>
+              <ui-button
+                title="Start video call"
+                color="white"
+                v-if="!onCall.with"
+                @click="startCall(true)"
               >
                 <ui-icon name="video" />
-              </button>
+              </ui-button>
+              <ui-button
+                title="Current call"
+                color="blue"
+                class="animate-bounce"
+                v-if="
+                  onCall.with &&
+                  contact.id === onCall.with.id &&
+                  panel !== 'Call'
+                "
+                @click="$store.dispatch('app/setPanel', 'Call')"
+              >
+                <ui-icon name="call" />
+              </ui-button>
             </div>
-            <button
-              class="
-                p-2
-                hover:bg-gray-100
-                rounded-full
-                relative
-                transition-all
-                duration-150
-              "
-              :class="{ 'rotate-90': showDetail }"
-              @click="showDetail = !showDetail"
-            >
-              <ui-icon name="options" />
-            </button>
+            <div class="w-auto">
+              <ui-button
+                title="Contact details"
+                color="white"
+                :class="{ 'rotate-90': showDetail }"
+                @click="showDetail = !showDetail"
+              >
+                <ui-icon name="options" />
+              </ui-button>
+            </div>
           </div>
         </div>
         <messages />
@@ -74,6 +95,7 @@ import UiTransition from "./ui/UiTransition.vue";
 import Contacts from "./Contacts.vue";
 
 import { $play, $socket } from "../utils";
+import UiButton from "./ui/UiButton.vue";
 
 export default {
   components: {
@@ -83,6 +105,7 @@ export default {
     ContactDetail,
     UiTransition,
     Contacts,
+    UiButton,
   },
   data() {
     return {
@@ -102,20 +125,29 @@ export default {
     panel() {
       return this.$store.getters["app/panel"];
     },
+    onCall() {
+      return this.$store.getters["app/onCall"];
+    },
   },
   methods: {
-    startCall() {
-      this.$store.dispatch("app/setPanel", "Call").then(() => {
-        this.$store
-          .dispatch("app/setOnCall", { with: this.contact, caller: true })
-          .then(() => {
+    startCall(video = false) {
+      console.log(video);
+      this.$store
+        .dispatch("app/setOnCall", {
+          with: this.contact,
+          caller: true,
+          video: video,
+        })
+        .then(() => {
+          this.$store.dispatch("app/setPanel", "Call").then(() => {
             $socket.emit("calling", {
               contact: this.contact.id,
               caller: this.user,
+              video: video,
             });
             $play("ringtone", true);
           });
-      });
+        });
     },
   },
 };
