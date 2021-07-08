@@ -131,7 +131,6 @@ export default {
   },
   methods: {
     startCall(video = false) {
-      console.log(video);
       this.$store
         .dispatch("app/setOnCall", {
           with: this.contact,

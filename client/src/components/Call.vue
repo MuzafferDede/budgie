@@ -3,7 +3,15 @@
     <div class="flex flex-col w-full" v-show="connected">
       <div class="p-2 w-full relative">
         <video
-          class="w-full h-full object-cover rounded-lg bg-gray-500"
+          class="
+            w-full
+            h-full
+            object-cover
+            rounded-lg
+            bg-gray-500
+            transform
+            -scale-1
+          "
           ref="partner"
           @loadedmetadata="$event.target.play()"
         />
@@ -195,7 +203,17 @@ export default {
     },
     config() {
       return {
-        video: this.onCall.video ? { width: 1280, height: 720 } : false,
+        video: this.onCall.video
+          ? {
+              mandatory: {
+                minWidth: 320,
+                maxWidth: 1280,
+                minHeight: 180,
+                maxHeight: 720,
+                minFrameRate: 30,
+              },
+            }
+          : false,
         audio: true,
       };
     },
@@ -263,7 +281,7 @@ export default {
         });
     },
     hang() {
-      $play("ringtone", false, false);
+      $play("hang");
 
       if (this.connected) {
         this.connected = false;
