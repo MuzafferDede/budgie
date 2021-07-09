@@ -1,7 +1,7 @@
 <template>
   <div class="shadow rounded-lg p-4 flex space-x-4 w-full">
-    <ui-icon name="notification" />
-    <div class="space-y-1">
+    <ui-icon name="notification" class="flex-0" />
+    <div class="space-y-1 w-full">
       <strong>{{ info.title }}</strong>
       <div class="space-y-1">
         <p class="text-sm">{{ info.body }}</p>
