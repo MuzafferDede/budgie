@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "nodemon server.js & yarn --cwd client dev",
+    "postinstall": "yarn --cwd ./client install",
     "prepare": "yarn --cwd ./client install",
     "start": "node server.js"
   },

@@ -6,7 +6,7 @@
     "dev": "vite --port 5000 --open",
     "build": "vite  build",
     "serve": "vite preview",
-    "prepare": "yarn build"
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "moment": "^2.29.1",
