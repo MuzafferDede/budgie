@@ -63,8 +63,8 @@
                 "
                 :class="{
                   'animate-bounce':
-                    onCall.with &&
-                    onCall.with.id === contact.id &&
+                    call.with &&
+                    call.with.id === contact.id &&
                     panel !== 'Call',
                 }"
               >
@@ -219,8 +219,8 @@ export default {
       return (contact) =>
         this.$store.getters["messages/last"](this.user.id, contact.id);
     },
-    onCall() {
-      return this.$store.getters["app/onCall"];
+    call() {
+      return this.$store.getters["app/call"];
     },
     panel() {
       return this.$store.getters["app/panel"];

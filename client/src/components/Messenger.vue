@@ -148,19 +148,19 @@ export default {
   },
   beforeCreate() {
     this.$store.dispatch("app/setPanel", undefined).then(() => {
-      const onCall = this.$store.getters["app/onCall"];
+      const call = this.$store.getters["app/call"];
 
-      if (onCall.with) {
-        $socket.emit("hang", { contact: onCall.with.id });
+      if (call.with) {
+        $socket.emit("hang", { contact: call.with.id });
 
-        this.$store.dispatch("app/setOnCall", {});
+        this.$store.dispatch("app/setCall", {});
       }
     });
   },
   mounted() {
     $socket.on("calling", (payload) => {
       this.$store
-        .dispatch("app/setOnCall", {
+        .dispatch("app/setCall", {
           with: payload.caller,
           video: payload.video,
         })

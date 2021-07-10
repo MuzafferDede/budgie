@@ -4,12 +4,12 @@ export default {
         alert: undefined,
         event: undefined,
         panel: undefined,
-        onCall: {}
+        call: {}
     },
     getters: {
         alert: state => state.alert,
         event: state => state.event,
-        onCall: state => state.onCall,
+        call: state => state.call,
         panel: state => state.panel,
     },
     mutations: {
@@ -22,8 +22,11 @@ export default {
         SET_PANEL(state, payload) {
             state.panel = state.panel === payload ? undefined : payload
         },
-        SET_ON_CALL(state, payload) {
-            state.onCall = payload
+        SET_CALL(state, payload) {
+            state.call = payload
+        },
+        SET_CALL_PROP(state, { key, value }) {
+            state.call[key] = value
         },
     },
     actions: {
@@ -36,8 +39,11 @@ export default {
         setPanel({ commit }, data) {
             commit('SET_PANEL', data)
         },
-        setOnCall({ commit }, data) {
-            commit('SET_ON_CALL', data)
+        setCall({ commit }, data) {
+            commit('SET_CALL', data)
+        },
+        setCallProp({ commit }, data) {
+            commit('SET_CALL_PROP', data)
         },
     }
 }

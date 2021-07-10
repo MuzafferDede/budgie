@@ -36,7 +36,7 @@
               <ui-button
                 title="Start audio call"
                 color="white"
-                v-if="!onCall.with"
+                v-if="!call.with"
                 @click="startCall()"
               >
                 <ui-icon name="call" />
@@ -44,7 +44,7 @@
               <ui-button
                 title="Start video call"
                 color="white"
-                v-if="!onCall.with"
+                v-if="!call.with"
                 @click="startCall(true)"
               >
                 <ui-icon name="video" />
@@ -54,9 +54,7 @@
                 color="blue"
                 class="animate-bounce"
                 v-if="
-                  onCall.with &&
-                  contact.id === onCall.with.id &&
-                  panel !== 'Call'
+                  call.with && contact.id === call.with.id && panel !== 'Call'
                 "
                 @click="$store.dispatch('app/setPanel', 'Call')"
               >
@@ -125,14 +123,14 @@ export default {
     panel() {
       return this.$store.getters["app/panel"];
     },
-    onCall() {
-      return this.$store.getters["app/onCall"];
+    call() {
+      return this.$store.getters["app/call"];
     },
   },
   methods: {
     startCall(video = false) {
       this.$store
-        .dispatch("app/setOnCall", {
+        .dispatch("app/setCall", {
           with: this.contact,
           caller: true,
           video: video,

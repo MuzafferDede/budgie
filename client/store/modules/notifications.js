@@ -36,9 +36,11 @@ export default {
             // remove notification
             commit('REMOVE_NOTIFICATION', data)
         },
-        removeAllNotifications({ commit }) {
+        removeAllNotifications({ commit, dispatch }) {
             // remove all notifications
             commit('REMOVE_ALL_NOTIFICATIONS')
+
+            dispatch('app/setPanel', undefined, { root: true })
         },
         readAllNotifications({ commit }) {
             // read all notifications
