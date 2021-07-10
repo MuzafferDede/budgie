@@ -1,13 +1,23 @@
 <template>
-  <div class="h-screen overflow-hidden bg-white flex w-full">
+  <div
+    class="
+      h-screen
+      overflow-hidden
+      bg-white
+      flex
+      w-full
+      flex-col-reverse
+      lg:flex-row
+    "
+  >
     <side-panel />
     <div
-      class="w-full flex-col overflow-hidden lg:flex"
+      class="w-full flex-col overflow-hidden lg:flex flex-1"
       :class="{ hidden: panel, flex: !panel }"
     >
       <div class="border-b flex items-center justify-between flex-none">
-        <h1 class="hidden lg:block text-2xl p-4 text-gray-900">Budgie</h1>
-        <div class="w-full lg:w-80 flex lg:space-x-4 relative p-4">
+        <h1 class="text-2xl p-4 text-gray-900">Budgie</h1>
+        <div class="w-80 flex space-x-4 relative p-4 ml-auto">
           <div class="group">
             <ui-button
               title="Show notifications"
@@ -42,7 +52,7 @@
               <ui-icon name="notification" />
             </ui-button>
           </div>
-          <div class="pl-4 lg:border-l lg:w-full ml-auto">
+          <div class="pl-4 border-l w-full">
             <button
               title="Profile"
               class="flex w-full space-x-2 items-center text-left group"
@@ -86,7 +96,17 @@
     </div>
     <ui-transition animation="slide">
       <div
-        class="space-y-4 bg-white z-30 w-full lg:max-w-sm shadow p-4 relative"
+        class="
+          space-y-4
+          bg-white
+          z-30
+          w-full
+          lg:max-w-sm
+          shadow
+          p-4
+          relative
+          flex-1
+        "
         v-if="panel"
       >
         <ui-transition animation="pull">

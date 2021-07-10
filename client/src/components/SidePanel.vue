@@ -3,10 +3,16 @@
     class="
       bg-gray-800
       text-white
-      p-4
-      flex-shrink-0 flex flex-col
-      space-y-4
+      p-2
+      lg:p-4
+      flex-shrink-0 flex
+      lg:flex-col
+      lg:space-y-4
       items-center
+      space-x-4
+      lg:space-x-0
+      justify-center
+      lg:justify-start
     "
   >
     <button
@@ -16,15 +22,6 @@
     >
       <ui-icon name="avatar" />
     </button>
-    <div class="py-4 space-y-5 flex-col flex">
-      <button
-        title="Add contact"
-        class="bg-gray-600 hover:bg-gray-700 p-3 rounded-full"
-        @click="$store.dispatch('app/setPanel', undefined)"
-      >
-        <ui-icon name="contacts" />
-      </button>
-    </div>
   </div>
 </template>
 

@@ -47,7 +47,7 @@
         </div>
       </div>
       <div
-        class="w-32 absolute top-0 right-0 z-10 border m-2"
+        class="w-1/6 absolute top-0 right-0 z-10 border m-2"
         :class="{ 'h-0 w-0 overflow-hidden': !call.video }"
       >
         <video
@@ -170,11 +170,6 @@ const ICE_SERVERS = [
 
 export default {
   components: { UiButton, UiIcon },
-  data() {
-    return {
-      duration: 0,
-    };
-  },
   computed: {
     contact() {
       return this.$store.getters["contacts/contact"];
@@ -183,12 +178,9 @@ export default {
       return this.$store.getters["app/call"];
     },
     timer() {
-      return this.call.connected
-        ? $moment(this.call.connected)
-            .utc()
-            .add(this.duration, "seconds")
-            .format("HH:mm:ss")
-        : false;
+      return this.call.duration
+        ? new Date(this.call.duration * 1000).toISOString().substr(11, 8)
+        : "00:00:00";
     },
   },
   created() {
@@ -264,6 +256,8 @@ export default {
     },
     hang() {
       $play("hang");
+
+      clearInterval(window.interval);
 
       if (this.call.connected) {
         this.setProp("connected", false);
@@ -388,10 +382,14 @@ export default {
       });
     },
     callStarted() {
-      this.setProp("connected", 1);
+      this.setProp("connected", true);
 
-      setInterval(() => {
-        this.duration++;
+      clearInterval(window.interval);
+
+      this.setProp("duration", 0);
+
+      window.interval = setInterval(() => {
+        this.setProp("duration", (this.call.duration || 0) + 1);
       }, 1000);
     },
     setProp(key, value) {
