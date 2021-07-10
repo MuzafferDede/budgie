@@ -1,17 +1,9 @@
 <template>
-  <div class="bg-gray-700 p-4 h-full rounded-lg space-y-4 overflow-auto">
-    <div class="flex flex-col w-full" v-show="connected">
-      <div class="p-2 w-full relative">
+  <div class="bg-gray-700 h-full rounded-lg space-y-4 overflow-auto">
+    <div class="flex flex-col w-full relative" v-show="connected">
+      <div class="w-full relative">
         <video
-          class="
-            w-full
-            h-full
-            object-cover
-            rounded-lg
-            bg-gray-500
-            transform
-            -scale-x-1
-          "
+          class="w-full h-full object-cover bg-gray-500 transform -scale-x-1"
           ref="partner"
           @loadedmetadata="$event.target.play()"
         />
@@ -55,21 +47,13 @@
         </div>
       </div>
       <div
-        class="p-2 w-full relative"
+        class="w-32 absolute top-0 right-0 z-10 border m-2"
         :class="{ 'h-0 w-0 overflow-hidden': !onCall.video }"
       >
         <video
           controls="false"
           muted
-          class="
-            w-full
-            h-full
-            object-cover
-            rounded-lg
-            bg-gray-500
-            transform
-            -scale-x-1
-          "
+          class="w-full h-full object-cover bg-gray-500 transform -scale-x-1"
           ref="self"
           @loadedmetadata="$event.target.play()"
         />
