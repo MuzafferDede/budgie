@@ -211,22 +211,6 @@ export default {
     onCall() {
       return this.$store.getters["app/onCall"];
     },
-    config() {
-      return {
-        video: this.onCall.video
-          ? {
-              mandatory: {
-                minWidth: 320,
-                maxWidth: 1280,
-                minHeight: 180,
-                maxHeight: 720,
-                minFrameRate: 30,
-              },
-            }
-          : false,
-        audio: true,
-      };
-    },
     timer() {
       return this.connected
         ? $moment(this.connected)
@@ -238,7 +222,7 @@ export default {
   },
 
   mounted() {
-    this.prepare();
+    this.prepare(this.onCall.video);
 
     $socket.on("answer", (payload) => {
       this.RTC.setRemoteDescription(
@@ -323,12 +307,49 @@ export default {
 
       this.send("hang");
     },
-    prepare() {
+    prepare(video = false) {
+      navigator.permissions
+        .query({ name: "camera" })
+        .then((result) => {
+          if (result.state == "denied") {
+            this.$store.dispatch("app/setAlert", {
+              title: "Camera access required",
+              body: `In order to start a video/audio call, you must allow this webpage access to your camera.`,
+              time: new Date(),
+              color: "red",
+            });
+          }
+        })
+        .then(() => {
+          navigator.permissions.query({ name: "microphone" }).then((result) => {
+            if (result.state == "denied") {
+              this.$store.dispatch("app/setAlert", {
+                title: "Microphone access required",
+                body: `In order to start a video/audio call, you must allow this webpage access to your microphone.`,
+                time: new Date(),
+                color: "red",
+              });
+            }
+          });
+        });
+
       return navigator.mediaDevices
-        .getUserMedia(this.config)
+        .getUserMedia({
+          video: video
+            ? {
+                mandatory: {
+                  minWidth: 320,
+                  maxWidth: 1280,
+                  minHeight: 180,
+                  maxHeight: 720,
+                  minFrameRate: 30,
+                },
+              }
+            : false,
+          audio: true,
+        })
         .then((stream) => {
           this.sessionStream = stream;
-
           this.$refs.self.srcObject = this.sessionStream;
 
           this.RTC = new RTCPeerConnection(
@@ -354,7 +375,13 @@ export default {
           };
         })
         .catch((error) => {
-          console.log("error at preparing", error);
+          this.$store.dispatch("app/setAlert", {
+            title: "Camera and Microphone access required",
+            body: `In order to start a video/audio call, you must allow this webpage access to your camera and microphone.`,
+            time: new Date(),
+            color: "red",
+          });
+          console.log("Error at preparing. Trying without video", error);
         });
     },
     send(type, data) {

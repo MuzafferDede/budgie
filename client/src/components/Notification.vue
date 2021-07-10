@@ -6,7 +6,8 @@
       <div class="space-y-1">
         <p class="text-sm">{{ info.body }}</p>
         <span
-          class="flex-shrink-0 text-xs text-blue-400 italic"
+          class="flex-shrink-0 text-xs italic"
+          :class="{ 'text-blue-400': !info.color }"
           v-if="info.time"
           >{{ $time(info.time) }}</span
         >

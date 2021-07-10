@@ -52,7 +52,7 @@
                 class="
                   rounded-full
                   bg-white
-                  group-hover:bg-gray-100 group-hover:bg-gray-100
+                  group-hover:bg-gray-100
                   shadow
                   px-3
                   py-3

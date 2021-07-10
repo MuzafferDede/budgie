@@ -1,7 +1,15 @@
 <template>
   <ui-transition animation="pull">
-    <div class="fixed bottom-0 right-0 m-4 z-50 w-full max-w-xs" v-if="show">
-      <notification :info="info" :class="bg" />
+    <div
+      class="fixed bottom-0 right-0 m-8 z-50 w-full max-w-xs space-y-4"
+      v-show="Object.keys(queue).length"
+    >
+      <notification
+        :info="notification"
+        :class="bg"
+        v-for="notification of queue"
+        :key="notification"
+      />
     </div>
   </ui-transition>
 </template>
@@ -10,6 +18,8 @@
 import Notification from "./Notification.vue";
 import UiButton from "./ui/UiButton.vue";
 import UiTransition from "./ui/UiTransition.vue";
+
+import { $uuid } from "../utils";
 
 const colors = {
   green: "bg-green-400 text-white",
@@ -29,6 +39,7 @@ export default {
   data() {
     return {
       show: undefined,
+      queue: {},
     };
   },
   computed: {
@@ -40,14 +51,14 @@ export default {
     },
   },
   watch: {
-    info(newInfo, oldInfo) {
-      if (newInfo !== oldInfo) {
-        clearTimeout(this.show);
+    info(info) {
+      const id = $uuid();
 
-        this.show = setTimeout(() => {
-          this.show = undefined;
-        }, 5000);
-      }
+      this.queue[id] = info;
+
+      setTimeout(() => {
+        delete this.queue[id];
+      }, 15000);
     },
   },
 };
