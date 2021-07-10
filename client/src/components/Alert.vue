@@ -58,7 +58,7 @@ export default {
 
       setTimeout(() => {
         delete this.queue[id];
-      }, 15000);
+      }, 5000);
     },
   },
 };
