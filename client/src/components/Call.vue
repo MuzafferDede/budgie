@@ -3,7 +3,7 @@
     <div class="flex flex-col w-full relative" v-show="call.connected">
       <div class="w-full relative">
         <video
-          class="w-full h-full object-cover bg-gray-500 transform -scale-x-1"
+          class="w-full h-full object-cover bg-gray-500 transform"
           ref="partner"
           @loadedmetadata="$event.target.play()"
         />
