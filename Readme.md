@@ -12,6 +12,5 @@ A P2P messenger application.
 - [ ] consider blockchain for auth
 - [ ] imporove code
 - [ ] imporove ui
-- [ ] study publishing
 
 
