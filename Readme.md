@@ -1,6 +1,6 @@
 # Budgie Messenger
 
-A P2P messenger application wituout a server.
+A P2P messenger application.
 
 ## Todos
 
