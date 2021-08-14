@@ -6,8 +6,8 @@ A P2P messenger application.
 
 - [x] use vite
 - [x] create basic functions
-- [ ] fix video call layout
-- [ ] add vioce call
+- [x] fix video call layout
+- [x] add vioce call
 - [ ] change db to indexedDB
 - [ ] consider blockchain for auth
 - [ ] imporove code
