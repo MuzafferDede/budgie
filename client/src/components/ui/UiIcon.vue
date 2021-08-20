@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import * as icons from "../../icons";
+import { defineAsyncComponent } from 'vue'
 
 const dimensions = {
   none: "",
@@ -17,6 +17,7 @@ const dimensions = {
   "4xl": "w-20 h-20",
 };
 
+
 export default {
   props: {
     name: {
@@ -29,12 +30,12 @@ export default {
     },
   },
   computed: {
+    currentIcon() {
+      return defineAsyncComponent(() => import(`../../assets/icons/svg/${this.name}.svg`))
+    },
     // assign width and height of the icon
     dimension() {
       return dimensions[this.size];
-    },
-    currentIcon() {
-      return icons[this.name];
     },
   },
 };
