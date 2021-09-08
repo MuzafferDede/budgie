@@ -1,7 +1,0 @@
-<div class="relative" x-data="{ activeSlide: 0, slides: ['AFFF.jpeg', 'İnşaat.jpeg', 'İlaçlama.jpeg'] }" x-init="setInterval(() => { activeSlide = activeSlide === slides.length-1 ? 0 : activeSlide + 1 }, 5000)">
-    <template x-for="(slide,index) in slides" :key="index">
-        <div x-show="activeSlide === index" class="px-1 text-white rounded">
-            <img class="h-96 w-full rounded shadow z-0" x-bind:src="`img/${slide}`">
-        </div>
-    </template>
-</div>
