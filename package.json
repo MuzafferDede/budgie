@@ -8,8 +8,8 @@
     "yarn": "1.x"
   },
   "scripts": {
-    "dev": "nodemon server.js & yarn --cwd client dev",
-    "postinstall": "yarn --cwd ./client install",
+    "dev": "nodemon server.js & npm --cwd client dev",
+    "postinstall": "npm --cwd ./client install",
     "start": "node server.js"
   },
   "dependencies": {

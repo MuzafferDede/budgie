@@ -1,22 +1,28 @@
 <template>
-  <compoment class="flex-shrink-0" :is="currentIcon" :class="dimension" />
+  <component
+    v-if="currentIcon"
+    class="flex-shrink-0"
+    :is="currentIcon"
+    :class="dimension"
+  />
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent } from "vue";
 
 const dimensions = {
   none: "",
   xs: "w-3 h-3",
   sm: "w-4 h-4",
   DEFAULT: "w-6 h-6",
-  lg: "w-8 h-8 ",
+  lg: "w-8 h-8",
   xl: "w-10 h-10",
   "2xl": "w-12 h-12",
   "3xl": "w-16 h-16",
   "4xl": "w-20 h-20",
 };
 
+const iconModules = import.meta.glob("../../assets/icons/svg/*.svg");
 
 export default {
   props: {
@@ -31,11 +37,16 @@ export default {
   },
   computed: {
     currentIcon() {
-      return defineAsyncComponent(() => import(`../../assets/icons/svg/${this.name}.svg`))
+      if (!this.name) return null;
+
+      const loader =
+        iconModules[`../../assets/icons/svg/${this.name}.svg`] || null;
+
+      return loader ? defineAsyncComponent(loader) : null;
     },
     // assign width and height of the icon
     dimension() {
-      return dimensions[this.size];
+      return dimensions[this.size] ?? dimensions.DEFAULT;
     },
   },
 };
